@@ -6,15 +6,22 @@
     "dev": "bun run --watch src/main.ts",
     "start": "bun run src/main.ts",
     "test": "bun test tests/unit",
-    "test:e2e": "bun test tests/e2e"
+    "test:e2e": "bun test tests/e2e",
+    "typeorm": "bun run node_modules/typeorm/cli.js -d src/infrastructure/persistence/typeorm/data-source.ts",
+    "migration:run": "bun run typeorm migration:run",
+    "migration:revert": "bun run typeorm migration:revert",
+    "migration:generate": "bun run typeorm migration:generate src/infrastructure/persistence/typeorm/migrations/Migration"
   },
   "dependencies": {
     "@crash/money": "workspace:*",
     "@nestjs/common": "^11.1.17",
     "@nestjs/core": "^11.1.17",
     "@nestjs/platform-express": "^11.1.17",
+    "@nestjs/typeorm": "^11.0.1",
+    "pg": "^8.21.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "typeorm": "^1.0.0"
   },
   "devDependencies": {
     "bun-types": "latest",

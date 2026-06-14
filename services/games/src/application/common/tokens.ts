@@ -1,0 +1,2 @@
+export const GAME_ROUND_REPOSITORY = Symbol("GAME_ROUND_REPOSITORY");
+export const BET_REPOSITORY = Symbol("BET_REPOSITORY");
