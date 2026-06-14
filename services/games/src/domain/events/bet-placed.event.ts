@@ -1,11 +1,10 @@
 import type { DomainEvent } from "../shared/domain-event";
-import type { Money } from "../value-objects/money.value-object";
 
 export interface BetPlacedPayload {
   readonly betId: string;
   readonly playerId: string;
   readonly roundId: string;
-  readonly amount: Money;
+  readonly amountCents: bigint;
 }
 
 export class BetPlacedEvent implements DomainEvent<BetPlacedPayload> {

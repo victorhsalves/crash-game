@@ -1,6 +1,6 @@
+import { Money } from "@crash/money";
 import { TransactionType } from "../enums/transaction-type.enum";
 import { DomainError } from "../errors/domain-error";
-import { Money } from "../value-objects/money.value-object";
 
 export interface WalletTransactionProps {
   readonly id: string;

@@ -1,8 +1,8 @@
+import { Money } from "@crash/money";
 import { BetStatus } from "../enums/bet-status.enum";
 import { DomainError } from "../errors/domain-error";
 import { BetPlacedEvent } from "../events/bet-placed.event";
 import { CashoutRequestedEvent } from "../events/cashout-requested.event";
-import { Money } from "../value-objects/money.value-object";
 import { Multiplier } from "../value-objects/multiplier.value-object";
 
 export interface BetProps {
@@ -31,8 +31,8 @@ export interface PlacedBet {
 }
 
 export class Bet {
-  private static readonly MinimumAmountCents = 100n;
-  private static readonly MaximumAmountCents = 100_000n;
+  private static readonly MinimumAmount = Money.fromCents(100n);
+  private static readonly MaximumAmount = Money.fromCents(100_000n);
 
   private readonly betId: string;
   private readonly betPlayerId: string;
@@ -57,11 +57,11 @@ export class Bet {
       throw new DomainError("Bet round id is required.");
     }
 
-    if (props.amount.value < Bet.MinimumAmountCents) {
+    if (props.amount.lessThan(Bet.MinimumAmount)) {
       throw new DomainError("Bet amount must be at least 1.00.");
     }
 
-    if (props.amount.value > Bet.MaximumAmountCents) {
+    if (props.amount.greaterThan(Bet.MaximumAmount)) {
       throw new DomainError("Bet amount must be less than or equal to 1,000.00.");
     }
 
@@ -89,7 +89,7 @@ export class Bet {
           betId: bet.id,
           playerId: bet.playerId,
           roundId: bet.roundId,
-          amount: bet.amount,
+          amountCents: bet.amount.value,
         },
         bet.createdAt,
       ),
@@ -153,7 +153,7 @@ export class Bet {
         playerId: this.betPlayerId,
         roundId: this.betRoundId,
         cashoutMultiplier: multiplier.value,
-        payoutAmount,
+        payoutAmountCents: payoutAmount.value,
       },
       cashedOutAt,
     );

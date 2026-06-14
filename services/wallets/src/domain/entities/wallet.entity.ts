@@ -1,8 +1,8 @@
+import { Money } from "@crash/money";
 import { DomainError } from "../errors/domain-error";
 import { WalletCreditedEvent } from "../events/wallet-credited.event";
 import { WalletDebitedEvent } from "../events/wallet-debited.event";
 import { AggregateRoot } from "../shared/aggregate-root";
-import { Money } from "../value-objects/money.value-object";
 
 export interface WalletProps {
   readonly id: string;
@@ -89,6 +89,10 @@ export class Wallet extends AggregateRoot {
     }
 
     const debitedAt = new Date();
+
+    if (this.walletBalance.lessThan(amount)) {
+      throw new DomainError("Insufficient balance.");
+    }
 
     this.walletBalance = this.walletBalance.subtract(amount);
     this.walletUpdatedAt = debitedAt;

@@ -2,10 +2,13 @@ FROM oven/bun:1-alpine
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json bun.lock ./
+COPY packages/money ./packages/money
+COPY services/wallets ./services/wallets
+
 RUN bun install
 
-COPY . .
+WORKDIR /app/services/wallets
 
 EXPOSE 4002
 

@@ -1,11 +1,11 @@
-import { DomainError } from "../errors/domain-error";
+import { MoneyError } from "./money.error";
 
 export class Money {
   private readonly cents: bigint;
 
   private constructor(cents: bigint) {
     if (cents < 0n) {
-      throw new DomainError("Money cannot be negative.");
+      throw new MoneyError("Money cannot be negative.");
     }
 
     this.cents = cents;
@@ -29,7 +29,7 @@ export class Money {
 
   public subtract(amount: Money): Money {
     if (this.cents < amount.cents) {
-      throw new DomainError("Money cannot be negative.");
+      throw new MoneyError("Money cannot be negative.");
     }
 
     return new Money(this.cents - amount.cents);
@@ -39,7 +39,23 @@ export class Money {
     return this.cents === amount.cents;
   }
 
+  public greaterThan(amount: Money): boolean {
+    return this.cents > amount.cents;
+  }
+
+  public lessThan(amount: Money): boolean {
+    return this.cents < amount.cents;
+  }
+
+  public isZero(): boolean {
+    return this.cents === 0n;
+  }
+
   public toNumber(): number {
     return Number(this.cents) / 100;
+  }
+
+  public toJSON(): string {
+    return this.cents.toString();
   }
 }
