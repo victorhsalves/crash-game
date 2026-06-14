@@ -15,7 +15,7 @@ export class GetWalletByPlayerIdUseCase {
     const wallet = await this.walletRepository.findByPlayerId(playerId);
 
     if (wallet === null) {
-      throw new WalletNotFoundError(playerId);
+      throw WalletNotFoundError.byPlayerId(playerId);
     }
 
     return wallet;

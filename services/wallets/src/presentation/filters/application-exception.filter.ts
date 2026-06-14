@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from "@nestjs/common";
 import { ApplicationError } from "../../application/errors/application-error";
+import { DuplicateTransactionReferenceError } from "../../application/errors/duplicate-transaction-reference.error";
 import { WalletAlreadyExistsError } from "../../application/errors/wallet-already-exists.error";
 import { WalletNotFoundError } from "../../application/errors/wallet-not-found.error";
 
@@ -22,6 +23,10 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
 
   private resolveStatus(exception: ApplicationError): number {
     if (exception instanceof WalletAlreadyExistsError) {
+      return HttpStatus.CONFLICT;
+    }
+
+    if (exception instanceof DuplicateTransactionReferenceError) {
       return HttpStatus.CONFLICT;
     }
 
