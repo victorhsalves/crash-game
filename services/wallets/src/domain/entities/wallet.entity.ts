@@ -1,5 +1,6 @@
 import { Money } from "@crash/money";
 import { DomainError } from "../errors/domain-error";
+import { InsufficientBalanceError } from "../errors/insufficient-balance.error";
 import { WalletCreditedEvent } from "../events/wallet-credited.event";
 import { WalletDebitedEvent } from "../events/wallet-debited.event";
 import { AggregateRoot } from "../shared/aggregate-root";
@@ -91,7 +92,7 @@ export class Wallet extends AggregateRoot {
     const debitedAt = new Date();
 
     if (this.walletBalance.lessThan(amount)) {
-      throw new DomainError("Insufficient balance.");
+      throw new InsufficientBalanceError();
     }
 
     this.walletBalance = this.walletBalance.subtract(amount);

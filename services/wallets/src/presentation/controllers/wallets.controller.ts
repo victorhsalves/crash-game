@@ -1,10 +1,13 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from "@nestjs/common";
 import { CreateWalletUseCase } from "../../application/use-cases/create-wallet/create-wallet.use-case";
 import { CreditWalletUseCase } from "../../application/use-cases/credit-wallet/credit-wallet.use-case";
+import { DebitWalletUseCase } from "../../application/use-cases/debit-wallet/debit-wallet.use-case";
 import { GetWalletByPlayerIdUseCase } from "../../application/use-cases/get-wallet-by-player-id/get-wallet-by-player-id.use-case";
 import { CreateWalletDto } from "../dtos/create-wallet.dto";
 import { CreditWalletDto } from "../dtos/credit-wallet.dto";
 import { CreditWalletResponseDto } from "../dtos/credit-wallet-response.dto";
+import { DebitWalletDto } from "../dtos/debit-wallet.dto";
+import { DebitWalletResponseDto } from "../dtos/debit-wallet-response.dto";
 import { HealthCheckResponseDto } from "../dtos/health-check-response.dto";
 import { WalletResponseDto } from "../dtos/wallet-response.dto";
 
@@ -14,6 +17,7 @@ export class WalletsController {
     private readonly createWalletUseCase: CreateWalletUseCase,
     private readonly getWalletByPlayerIdUseCase: GetWalletByPlayerIdUseCase,
     private readonly creditWalletUseCase: CreditWalletUseCase,
+    private readonly debitWalletUseCase: DebitWalletUseCase,
   ) {}
 
   @Get("health")
@@ -39,6 +43,18 @@ export class WalletsController {
     });
 
     return CreditWalletResponseDto.fromDomain(wallet, transaction);
+  }
+
+  @Post("debit")
+  @HttpCode(HttpStatus.OK)
+  async debit(@Body() dto: DebitWalletDto): Promise<DebitWalletResponseDto> {
+    const { wallet, transaction } = await this.debitWalletUseCase.execute({
+      walletId: dto.walletId,
+      amountCents: dto.amountCents,
+      referenceId: dto.referenceId,
+    });
+
+    return DebitWalletResponseDto.fromDomain(wallet, transaction);
   }
 
   @Get(":playerId")
