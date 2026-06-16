@@ -9,9 +9,9 @@ import { GameRoundMapper } from "../mappers/game-round.mapper";
 @Injectable()
 export class TypeOrmGameRoundRepository implements GameRoundRepository {
   private static readonly ActiveStatuses: readonly RoundStatus[] = [
-    RoundStatus.Created,
-    RoundStatus.BettingOpen,
-    RoundStatus.InProgress,
+    RoundStatus.Waiting,
+    RoundStatus.Betting,
+    RoundStatus.Running,
     RoundStatus.Crashed,
   ];
 

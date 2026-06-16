@@ -1,7 +1,7 @@
 export enum RoundStatus {
-  Created = "CREATED",
-  BettingOpen = "BETTING_OPEN",
-  InProgress = "IN_PROGRESS",
+  Waiting = "WAITING",
+  Betting = "BETTING",
+  Running = "RUNNING",
   Crashed = "CRASHED",
   Finished = "FINISHED",
 }

@@ -11,9 +11,11 @@ export class GameRoundMapper {
       status: entity.status as RoundStatus,
       currentMultiplier: Multiplier.fromBasisPoints(entity.currentMultiplier),
       crashPoint: CrashPoint.fromBasisPoints(entity.crashPoint),
+      bettingEndsAt: entity.bettingEndsAt,
       startedAt: entity.startedAt,
       crashedAt: entity.crashedAt,
       createdAt: entity.createdAt,
+      updatedAt: entity.updatedAt,
     });
   }
 
@@ -24,9 +26,11 @@ export class GameRoundMapper {
     entity.status = round.status;
     entity.currentMultiplier = round.currentMultiplier.valueInBasisPoints;
     entity.crashPoint = round.crashPoint.valueInBasisPoints;
+    entity.bettingEndsAt = round.bettingEndsAt;
     entity.startedAt = round.startedAt;
     entity.crashedAt = round.crashedAt;
     entity.createdAt = round.createdAt;
+    entity.updatedAt = round.updatedAt;
 
     return entity;
   }

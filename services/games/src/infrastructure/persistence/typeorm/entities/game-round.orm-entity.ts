@@ -14,6 +14,9 @@ export class GameRoundOrmEntity {
   @Column({ name: "crash_point", type: "int" })
   public crashPoint!: number;
 
+  @Column({ name: "betting_ends_at", type: "timestamptz", nullable: true })
+  public bettingEndsAt!: Date | null;
+
   @Column({ name: "started_at", type: "timestamptz", nullable: true })
   public startedAt!: Date | null;
 
@@ -22,4 +25,7 @@ export class GameRoundOrmEntity {
 
   @Column({ name: "created_at", type: "timestamptz" })
   public createdAt!: Date;
+
+  @Column({ name: "updated_at", type: "timestamptz" })
+  public updatedAt!: Date;
 }

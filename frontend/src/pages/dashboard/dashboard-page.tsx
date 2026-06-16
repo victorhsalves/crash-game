@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { isNoActiveRoundError, useCurrentRound } from "@/hooks/use-current-round";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLogout } from "@/hooks/use-logout";
 import { useWallet } from "@/hooks/use-wallet";
+import type { GameRoundStatus } from "@/types/game.types";
 
 function DataRow({ label, value }: { label: string; value: string }) {
   return (
@@ -14,12 +16,28 @@ function DataRow({ label, value }: { label: string; value: string }) {
   );
 }
 
+const statusBadgeClass: Record<GameRoundStatus, string> = {
+  WAITING: "bg-muted/20 text-muted",
+  BETTING: "bg-primary/20 text-primary",
+  RUNNING: "bg-primary/30 text-primary",
+  CRASHED: "bg-danger/20 text-danger",
+};
+
+function StatusBadge({ status }: { status: GameRoundStatus }) {
+  return (
+    <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${statusBadgeClass[status]}`}>
+      {status}
+    </span>
+  );
+}
+
 export function DashboardPage() {
   const userQuery = useCurrentUser();
   const walletQuery = useWallet();
+  const roundQuery = useCurrentRound();
   const logout = useLogout();
 
-  const isLoading = userQuery.isLoading || walletQuery.isLoading;
+  const isLoading = userQuery.isLoading || walletQuery.isLoading || roundQuery.isLoading;
   const error = userQuery.error ?? walletQuery.error;
 
   if (isLoading) {
@@ -52,6 +70,11 @@ export function DashboardPage() {
     return null;
   }
 
+  const round = roundQuery.data;
+  const noActiveRound = roundQuery.error !== null && isNoActiveRoundError(roundQuery.error);
+  const roundError =
+    roundQuery.error !== null && !isNoActiveRoundError(roundQuery.error) ? roundQuery.error : null;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -74,6 +97,41 @@ export function DashboardPage() {
         <DataRow label="Wallet ID" value={wallet.id} />
         <DataRow label="Balance" value={wallet.balance} />
         <DataRow label="Created At" value={wallet.createdAt} />
+      </Card>
+
+      <Card title="Rodada Atual">
+        {roundError ? (
+          <div className="flex flex-col items-start gap-3 py-2">
+            <p className="text-sm text-danger">
+              {roundError instanceof Error ? roundError.message : "Erro ao carregar rodada"}
+            </p>
+            <Button variant="secondary" onClick={() => void roundQuery.refetch()}>
+              Tentar novamente
+            </Button>
+          </div>
+        ) : noActiveRound || !round ? (
+          <p className="py-2 text-sm text-muted">Nenhuma rodada ativa</p>
+        ) : (
+          <>
+            <div className="flex items-center justify-between border-b border-border py-3">
+              <span className="text-sm text-muted">Status</span>
+              <StatusBadge status={round.status} />
+            </div>
+            <DataRow label="Round ID" value={round.id} />
+            {round.currentMultiplier !== null && (
+              <DataRow label="Multiplier" value={`${round.currentMultiplier}x`} />
+            )}
+            {round.crashPoint !== null && (
+              <DataRow label="Crash Point" value={`${round.crashPoint}x`} />
+            )}
+            {round.bettingEndsAt !== null && (
+              <DataRow label="Betting Ends At" value={round.bettingEndsAt} />
+            )}
+            {round.startedAt !== null && <DataRow label="Started At" value={round.startedAt} />}
+            {round.crashedAt !== null && <DataRow label="Crashed At" value={round.crashedAt} />}
+            <DataRow label="Created At" value={round.createdAt} />
+          </>
+        )}
       </Card>
     </div>
   );
