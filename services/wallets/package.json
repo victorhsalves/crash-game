@@ -13,6 +13,7 @@
     "migration:generate": "bun run typeorm migration:generate src/infrastructure/persistence/typeorm/migrations/Migration"
   },
   "dependencies": {
+    "@crash/auth": "workspace:*",
     "@crash/money": "workspace:*",
     "@nestjs/common": "^11.1.17",
     "@nestjs/core": "^11.1.17",

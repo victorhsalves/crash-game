@@ -8,6 +8,10 @@ services:
         paths:
           - /games
         strip_path: true
+      - name: auth-routes
+        paths:
+          - /auth
+        strip_path: false
 
   - name: wallets-service
     url: http://wallets:4002
