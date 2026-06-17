@@ -49,6 +49,7 @@ export class GamesController {
     const result = await this.placeBetUseCase.execute({
       playerId: user.id,
       amountCents: dto.amountCents,
+      socketId: dto.socketId,
     });
 
     return PlaceBetResponseDto.create(result.betId);

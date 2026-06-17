@@ -11,6 +11,7 @@ export interface BetProps {
   readonly roundId: string;
   readonly amount: Money;
   readonly status?: BetStatus;
+  readonly socketId?: string | null;
   readonly cashoutMultiplier?: Multiplier | null;
   readonly payoutAmount?: Money | null;
   readonly createdAt?: Date;
@@ -22,6 +23,7 @@ export interface PlaceBetProps {
   readonly playerId: string;
   readonly roundId: string;
   readonly amount: Money;
+  readonly socketId?: string | null;
   readonly createdAt?: Date;
 }
 
@@ -43,6 +45,7 @@ export class Bet {
   private betPayoutAmount: Money | null;
   private readonly betCreatedAt: Date;
   private betCashedOutAt: Date | null;
+  private readonly betSocketId: string | null;
 
   public constructor(props: BetProps) {
     if (props.id.trim().length === 0) {
@@ -74,6 +77,7 @@ export class Bet {
     this.betPayoutAmount = props.payoutAmount ?? null;
     this.betCreatedAt = props.createdAt ? new Date(props.createdAt.getTime()) : new Date();
     this.betCashedOutAt = props.cashedOutAt ? new Date(props.cashedOutAt.getTime()) : null;
+    this.betSocketId = props.socketId ?? null;
   }
 
   public static place(props: PlaceBetProps): PlacedBet {
@@ -130,6 +134,10 @@ export class Bet {
 
   public get cashedOutAt(): Date | null {
     return this.betCashedOutAt ? new Date(this.betCashedOutAt.getTime()) : null;
+  }
+
+  public get socketId(): string | null {
+    return this.betSocketId;
   }
 
   public cashout(multiplier: Multiplier): CashoutRequestedEvent {

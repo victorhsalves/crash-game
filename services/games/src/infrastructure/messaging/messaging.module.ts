@@ -57,7 +57,10 @@ export class WalletDebitFailedHandler implements OnModuleInit {
     this.subscriber.subscribe<WalletDebitFailedPayload>(
       WALLET_DEBIT_FAILED,
       async (envelope) => {
-        await this.processWalletDebitFailedUseCase.execute(envelope.event.payload.betId);
+        await this.processWalletDebitFailedUseCase.execute(
+          envelope.event.payload.betId,
+          envelope.event.payload.reason,
+        );
       },
     );
   }

@@ -58,6 +58,7 @@ export class PlaceBetUseCase {
       playerId: input.playerId,
       roundId: round.id,
       amount: Money.fromCents(BigInt(input.amountCents)),
+      socketId: input.socketId ?? null,
     });
 
     await this.betRepository.save(bet);

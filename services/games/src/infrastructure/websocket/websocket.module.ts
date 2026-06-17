@@ -1,10 +1,12 @@
 import { WebSocketModule } from "@crash/websocket";
 import { Module } from "@nestjs/common";
+import { BetWebSocketNotifier } from "./bet-websocket.notifier";
 import { InternalTestWebSocketController } from "./internal-test-websocket.controller";
 
 @Module({
   imports: [WebSocketModule.forRoot()],
   controllers: [InternalTestWebSocketController],
-  exports: [WebSocketModule],
+  providers: [BetWebSocketNotifier],
+  exports: [WebSocketModule, BetWebSocketNotifier],
 })
 export class WebSocketInfrastructureModule {}
