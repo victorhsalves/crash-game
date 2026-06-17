@@ -17,28 +17,57 @@ export interface WebSocketHandlers {
 class WebSocketService {
   private socket: Socket | null = null;
   private handlers: WebSocketHandlers = {};
+  private connectPromise: Promise<void> | null = null;
+  private connectGeneration = 0;
+  private connectedUrl: string | null = null;
 
   public subscribe(handlers: WebSocketHandlers): void {
     this.handlers = handlers;
   }
 
-  public async connect(url: string): Promise<void> {
-    if (this.socket?.connected) {
+  public connect(url: string): Promise<void> {
+    if (this.socket?.connected && this.connectedUrl === url) {
+      return Promise.resolve();
+    }
+
+    if (this.connectPromise !== null) {
+      return this.connectPromise;
+    }
+
+    this.connectGeneration += 1;
+    const generation = this.connectGeneration;
+
+    this.connectPromise = this.establishConnection(url, generation).finally(() => {
+      this.connectPromise = null;
+    });
+
+    return this.connectPromise;
+  }
+
+  private async establishConnection(url: string, generation: number): Promise<void> {
+    this.teardownSocket();
+
+    const token = await authService.getAccessToken();
+
+    if (generation !== this.connectGeneration) {
       return;
     }
 
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
-    }
-
-    const token = await authService.getAccessToken();
     const socket = io(url, {
       auth: {
         token: token ?? "",
       },
+      reconnection: false,
     });
+
+    if (generation !== this.connectGeneration) {
+      socket.removeAllListeners();
+      socket.disconnect();
+      return;
+    }
+
     this.socket = socket;
+    this.connectedUrl = url;
 
     socket.on("connect", () => {
       this.handlers.onConnect?.({ socketId: socket.id });
@@ -67,10 +96,20 @@ class WebSocketService {
   }
 
   public disconnect(): void {
-    if (this.socket) {
-      this.socket.disconnect();
-      this.socket = null;
+    this.connectGeneration += 1;
+    this.connectPromise = null;
+    this.teardownSocket();
+    this.connectedUrl = null;
+  }
+
+  private teardownSocket(): void {
+    if (this.socket === null) {
+      return;
     }
+
+    this.socket.removeAllListeners();
+    this.socket.disconnect();
+    this.socket = null;
   }
 }
 
