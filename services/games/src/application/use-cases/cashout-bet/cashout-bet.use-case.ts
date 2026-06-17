@@ -60,7 +60,7 @@ export class CashoutBetUseCase {
       throw BetNotAcceptedError.create();
     }
 
-    if (bet.status === BetStatus.Rejected) {
+    if (bet.status === BetStatus.Rejected || bet.status === BetStatus.Lost) {
       throw BetAlreadySettledError.create();
     }
 

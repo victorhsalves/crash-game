@@ -29,6 +29,9 @@ export class GameRoundOrmEntity {
   @Column({ name: "finished_at", type: "timestamptz", nullable: true })
   public finishedAt!: Date | null;
 
+  @Column({ name: "settled_at", type: "timestamptz", nullable: true })
+  public settledAt!: Date | null;
+
   @Column({ name: "created_at", type: "timestamptz" })
   public createdAt!: Date;
 

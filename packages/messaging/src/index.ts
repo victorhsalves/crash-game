@@ -23,11 +23,17 @@ export type {
 } from "./infrastructure/rabbitmq/rabbitmq.subscriber";
 export { RabbitMqSubscriber } from "./infrastructure/rabbitmq/rabbitmq.subscriber";
 export { MessagingModule } from "./messaging.module";
-export type { BetPlacedPayload } from "./contracts/bet";
+export type { BetPlacedPayload, BetCashedOutPayload } from "./contracts/bet";
 export {
   BET_PLACED,
+  BET_CASHED_OUT,
   WALLET_DEBITED,
   WALLET_DEBIT_FAILED,
+  WALLET_CREDITED,
 } from "./contracts/routing-keys";
 export { DebitFailureReason } from "./contracts/wallet";
-export type { WalletDebitedPayload, WalletDebitFailedPayload } from "./contracts/wallet";
+export type {
+  WalletDebitedPayload,
+  WalletDebitFailedPayload,
+  WalletCreditedPayload,
+} from "./contracts/wallet";

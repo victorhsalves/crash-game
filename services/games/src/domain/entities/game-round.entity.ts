@@ -18,6 +18,7 @@ export interface GameRoundProps {
   readonly startedAt?: Date | null;
   readonly crashedAt?: Date | null;
   readonly finishedAt?: Date | null;
+  readonly settledAt?: Date | null;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
@@ -32,6 +33,7 @@ export class GameRound extends AggregateRoot {
   private roundStartedAt: Date | null;
   private roundCrashedAt: Date | null;
   private roundFinishedAt: Date | null;
+  private roundSettledAt: Date | null;
   private readonly roundCreatedAt: Date;
   private roundUpdatedAt: Date;
 
@@ -61,6 +63,7 @@ export class GameRound extends AggregateRoot {
     this.roundStartedAt = props.startedAt ? new Date(props.startedAt.getTime()) : null;
     this.roundCrashedAt = props.crashedAt ? new Date(props.crashedAt.getTime()) : null;
     this.roundFinishedAt = props.finishedAt ? new Date(props.finishedAt.getTime()) : null;
+    this.roundSettledAt = props.settledAt ? new Date(props.settledAt.getTime()) : null;
     this.roundCreatedAt = props.createdAt ? new Date(props.createdAt.getTime()) : new Date();
     this.roundUpdatedAt = props.updatedAt ? new Date(props.updatedAt.getTime()) : new Date();
   }
@@ -99,6 +102,10 @@ export class GameRound extends AggregateRoot {
 
   public get finishedAt(): Date | null {
     return this.roundFinishedAt ? new Date(this.roundFinishedAt.getTime()) : null;
+  }
+
+  public get settledAt(): Date | null {
+    return this.roundSettledAt ? new Date(this.roundSettledAt.getTime()) : null;
   }
 
   public get createdAt(): Date {
@@ -214,5 +221,18 @@ export class GameRound extends AggregateRoot {
         finishedAt,
       ),
     );
+  }
+
+  public markSettled(at: Date): void {
+    if (this.roundStatus !== RoundStatus.Crashed && this.roundStatus !== RoundStatus.Finished) {
+      throw new DomainError("Only a crashed or finished round can be marked as settled.");
+    }
+
+    if (this.roundSettledAt !== null) {
+      return;
+    }
+
+    this.roundSettledAt = new Date(at.getTime());
+    this.roundUpdatedAt = new Date(at.getTime());
   }
 }

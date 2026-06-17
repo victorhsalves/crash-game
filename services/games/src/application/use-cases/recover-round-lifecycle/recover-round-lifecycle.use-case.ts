@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { RoundStatus } from "../../../domain/enums/round-status.enum";
 import type { GameRoundRepository } from "../../../domain/repositories/game-round.repository";
 import { GAME_ROUND_REPOSITORY } from "../../common/tokens";
@@ -7,6 +7,7 @@ import { CreateGameRoundUseCase } from "../create-game-round/create-game-round.u
 import { EnsureNextRoundWaitingUseCase } from "../ensure-next-round-waiting/ensure-next-round-waiting.use-case";
 import { FinishRoundUseCase } from "../finish-round/finish-round.use-case";
 import { OpenRoundBettingUseCase } from "../open-round-betting/open-round-betting.use-case";
+import { SettleRoundBetsUseCase } from "../settle-round-bets/settle-round-bets.use-case";
 import { StartRoundUseCase } from "../start-round/start-round.use-case";
 import type {
   RecoverRoundLifecycleInput,
@@ -16,6 +17,8 @@ import type {
 
 @Injectable()
 export class RecoverRoundLifecycleUseCase {
+  private readonly logger = new Logger(RecoverRoundLifecycleUseCase.name);
+
   public constructor(
     @Inject(GAME_ROUND_REPOSITORY)
     private readonly gameRoundRepository: GameRoundRepository,
@@ -25,12 +28,26 @@ export class RecoverRoundLifecycleUseCase {
     private readonly crashRoundUseCase: CrashRoundUseCase,
     private readonly finishRoundUseCase: FinishRoundUseCase,
     private readonly ensureNextRoundWaitingUseCase: EnsureNextRoundWaitingUseCase,
+    private readonly settleRoundBetsUseCase: SettleRoundBetsUseCase,
   ) {}
 
   public async execute(input: RecoverRoundLifecycleInput): Promise<RecoverRoundLifecycleResult> {
     const now = Date.now();
     const timers: ScheduledTimer[] = [];
     let action: RecoverRoundLifecycleResult["action"] = "resumed";
+
+    const unsettled = await this.gameRoundRepository.findUnsettled();
+
+    if (unsettled !== null) {
+      try {
+        await this.settleRoundBetsUseCase.execute({ roundId: unsettled.id });
+      } catch (error) {
+        this.logger.error(
+          `Failed to settle unsettled roundId=${unsettled.id} during recovery`,
+          error instanceof Error ? error.stack : String(error),
+        );
+      }
+    }
 
     const current = await this.gameRoundRepository.findCurrent();
 
@@ -64,6 +81,17 @@ export class RecoverRoundLifecycleUseCase {
       }
 
       if (current.status === RoundStatus.Crashed) {
+        if (current.settledAt === null) {
+          try {
+            await this.settleRoundBetsUseCase.execute({ roundId: current.id });
+          } catch (error) {
+            this.logger.error(
+              `Failed to settle roundId=${current.id} during crashed recovery`,
+              error instanceof Error ? error.stack : String(error),
+            );
+          }
+        }
+
         const crashedEndsAt = new Date(current.crashedAt!.getTime() + input.crashedDurationMs);
 
         await this.ensureNextRoundWaitingUseCase.execute();

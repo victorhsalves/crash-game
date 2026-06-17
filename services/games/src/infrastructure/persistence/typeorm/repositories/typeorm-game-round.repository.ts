@@ -46,6 +46,19 @@ export class TypeOrmGameRoundRepository implements GameRoundRepository {
     return entity !== null ? GameRoundMapper.toDomain(entity) : null;
   }
 
+  public async findUnsettled(): Promise<GameRound | null> {
+    const entity = await this.repository
+      .createQueryBuilder("round")
+      .where("round.status IN (:...statuses)", {
+        statuses: [RoundStatus.Crashed, RoundStatus.Finished],
+      })
+      .andWhere("round.settledAt IS NULL")
+      .orderBy("round.createdAt", "DESC")
+      .getOne();
+
+    return entity !== null ? GameRoundMapper.toDomain(entity) : null;
+  }
+
   public async save(round: GameRound): Promise<void> {
     await this.repository.save(GameRoundMapper.toPersistence(round));
   }

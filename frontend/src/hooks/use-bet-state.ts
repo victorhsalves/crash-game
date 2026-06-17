@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { BetState, BetStatus } from "@/types/game.types";
+import type { BetState, BetUpdatedWebSocketPayload } from "@/types/game.types";
 
 const initialBetState: BetState = {
   betId: null,
@@ -39,13 +39,7 @@ export function useBetState() {
     }
 
     if (event === "bet.updated" && typeof payload === "object" && payload !== null) {
-      const updated = payload as {
-        betId: string;
-        status: BetStatus;
-        multiplier: number;
-        payout: number;
-        cashedOutAt: string;
-      };
+      const updated = payload as BetUpdatedWebSocketPayload;
 
       setBetState({
         betId: updated.betId,

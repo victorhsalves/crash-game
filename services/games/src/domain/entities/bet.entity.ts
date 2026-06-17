@@ -3,6 +3,7 @@ import { BetStatus } from "../enums/bet-status.enum";
 import { DomainError } from "../errors/domain-error";
 import { BetPlacedEvent } from "../events/bet-placed.event";
 import { BetCashedOutEvent } from "../events/bet-cashed-out.event";
+import { BetLostEvent } from "../events/bet-lost.event";
 import { Multiplier } from "../value-objects/multiplier.value-object";
 
 export interface BetProps {
@@ -16,6 +17,7 @@ export interface BetProps {
   readonly payoutAmount?: Money | null;
   readonly createdAt?: Date;
   readonly cashedOutAt?: Date | null;
+  readonly payoutPublishedAt?: Date | null;
 }
 
 export interface PlaceBetProps {
@@ -45,6 +47,7 @@ export class Bet {
   private betPayoutAmount: Money | null;
   private readonly betCreatedAt: Date;
   private betCashedOutAt: Date | null;
+  private betPayoutPublishedAt: Date | null;
   private readonly betSocketId: string | null;
 
   public constructor(props: BetProps) {
@@ -77,6 +80,9 @@ export class Bet {
     this.betPayoutAmount = props.payoutAmount ?? null;
     this.betCreatedAt = props.createdAt ? new Date(props.createdAt.getTime()) : new Date();
     this.betCashedOutAt = props.cashedOutAt ? new Date(props.cashedOutAt.getTime()) : null;
+    this.betPayoutPublishedAt = props.payoutPublishedAt
+      ? new Date(props.payoutPublishedAt.getTime())
+      : null;
     this.betSocketId = props.socketId ?? null;
   }
 
@@ -140,6 +146,10 @@ export class Bet {
     return this.betSocketId;
   }
 
+  public get payoutPublishedAt(): Date | null {
+    return this.betPayoutPublishedAt ? new Date(this.betPayoutPublishedAt.getTime()) : null;
+  }
+
   public canCashout(): boolean {
     return this.betStatus === BetStatus.Accepted;
   }
@@ -180,6 +190,44 @@ export class Bet {
     }
 
     this.betStatus = BetStatus.Rejected;
+  }
+
+  public lose(at: Date): BetLostEvent {
+    if (this.betStatus === BetStatus.Lost) {
+      return this.buildLostEvent(at);
+    }
+
+    if (this.betStatus !== BetStatus.Accepted) {
+      throw new DomainError("Only an accepted bet can be marked as lost.");
+    }
+
+    this.betStatus = BetStatus.Lost;
+
+    return this.buildLostEvent(at);
+  }
+
+  public markPayoutPublished(at: Date): void {
+    if (this.betStatus !== BetStatus.CashedOut) {
+      throw new DomainError("Only a cashed out bet can have payout published.");
+    }
+
+    if (this.betPayoutPublishedAt !== null) {
+      return;
+    }
+
+    this.betPayoutPublishedAt = new Date(at.getTime());
+  }
+
+  private buildLostEvent(at: Date): BetLostEvent {
+    const lostAt = new Date(at.getTime());
+
+    return new BetLostEvent({
+      betId: this.betId,
+      roundId: this.betRoundId,
+      playerId: this.betPlayerId,
+      amount: this.betAmount.value,
+      lostAt,
+    });
   }
 
   private buildCashedOutEvent(): BetCashedOutEvent {

@@ -17,6 +17,7 @@ export class BetMapper {
       payoutAmount: entity.payoutAmount !== null ? Money.fromCents(BigInt(entity.payoutAmount)) : null,
       createdAt: entity.createdAt,
       cashedOutAt: entity.cashedOutAt,
+      payoutPublishedAt: entity.payoutPublishedAt,
       socketId: entity.socketId,
     });
   }
@@ -33,6 +34,7 @@ export class BetMapper {
     entity.payoutAmount = bet.payoutAmount !== null ? bet.payoutAmount.value.toString() : null;
     entity.createdAt = bet.createdAt;
     entity.cashedOutAt = bet.cashedOutAt;
+    entity.payoutPublishedAt = bet.payoutPublishedAt;
     entity.socketId = bet.socketId;
 
     return entity;

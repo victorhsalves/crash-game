@@ -49,7 +49,7 @@ export interface RoundState {
   phaseEndsAt: Date | null;
 }
 
-export type BetStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CASHED_OUT";
+export type BetStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CASHED_OUT" | "LOST";
 
 export interface BetState {
   betId: string | null;
@@ -63,10 +63,11 @@ export interface BetUpdatedWebSocketPayload {
   betId: string;
   userId: string;
   roundId: string;
-  status: "CASHED_OUT";
-  multiplier: number;
-  payout: number;
-  cashedOutAt: string;
+  status: "CASHED_OUT" | "LOST";
+  multiplier: number | null;
+  payout: number | null;
+  cashedOutAt: string | null;
+  walletCredited?: boolean;
 }
 
 export interface BetCashoutFailedWebSocketPayload {

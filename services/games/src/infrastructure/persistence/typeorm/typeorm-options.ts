@@ -6,6 +6,7 @@ import { AddGameRoundTimestamps1750000000001 } from "./migrations/1750000000001-
 import { AddBetSocketId1750000000002 } from "./migrations/1750000000002-AddBetSocketId";
 import { RoundLifecycleFields1750000000003 } from "./migrations/1750000000003-RoundLifecycleFields";
 import { AddCrashAtAndNullableCrashPoint1750000000004 } from "./migrations/1750000000004-AddCrashAtAndNullableCrashPoint";
+import { AddSettlementFields1750000000005 } from "./migrations/1750000000005-AddSettlementFields";
 
 export function buildDataSourceOptions(): DataSourceOptions {
   const url = process.env.DATABASE_URL;
@@ -24,6 +25,7 @@ export function buildDataSourceOptions(): DataSourceOptions {
       AddBetSocketId1750000000002,
       RoundLifecycleFields1750000000003,
       AddCrashAtAndNullableCrashPoint1750000000004,
+      AddSettlementFields1750000000005,
     ],
     synchronize: false,
     migrationsRun: false,

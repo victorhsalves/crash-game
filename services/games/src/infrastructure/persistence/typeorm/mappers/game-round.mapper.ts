@@ -16,6 +16,7 @@ export class GameRoundMapper {
       startedAt: entity.startedAt,
       crashedAt: entity.crashedAt,
       finishedAt: entity.finishedAt,
+      settledAt: entity.settledAt,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -33,6 +34,7 @@ export class GameRoundMapper {
     entity.startedAt = round.startedAt;
     entity.crashedAt = round.crashedAt;
     entity.finishedAt = round.finishedAt;
+    entity.settledAt = round.settledAt;
     entity.createdAt = round.createdAt;
     entity.updatedAt = round.updatedAt;
 

@@ -29,6 +29,9 @@ export class BetOrmEntity {
   @Column({ name: "cashed_out_at", type: "timestamptz", nullable: true })
   public cashedOutAt!: Date | null;
 
+  @Column({ name: "payout_published_at", type: "timestamptz", nullable: true })
+  public payoutPublishedAt!: Date | null;
+
   @Column({ name: "socket_id", type: "varchar", length: 64, nullable: true })
   public socketId!: string | null;
 }

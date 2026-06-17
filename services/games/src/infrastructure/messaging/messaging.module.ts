@@ -3,13 +3,16 @@ import {
   RabbitMqSubscriber,
   WALLET_DEBIT_FAILED,
   WALLET_DEBITED,
+  WALLET_CREDITED,
   type WalletDebitedPayload,
   type WalletDebitFailedPayload,
+  type WalletCreditedPayload,
 } from "@crash/messaging";
 import { Injectable, Logger, Module, type OnModuleInit, forwardRef } from "@nestjs/common";
 import { ApplicationModule } from "../../application/application.module";
 import { ProcessWalletDebitedUseCase } from "../../application/use-cases/process-wallet-debited/process-wallet-debited.use-case";
 import { ProcessWalletDebitFailedUseCase } from "../../application/use-cases/process-wallet-debit-failed/process-wallet-debit-failed.use-case";
+import { ProcessWalletCreditedUseCase } from "../../application/use-cases/process-wallet-credited/process-wallet-credited.use-case";
 
 @Injectable()
 export class TestEventHandler implements OnModuleInit {
@@ -20,7 +23,7 @@ export class TestEventHandler implements OnModuleInit {
   public async onModuleInit(): Promise<void> {
     await this.subscriber.register({
       queue: "games.queue",
-      routingKeys: ["infrastructure.test", WALLET_DEBITED, WALLET_DEBIT_FAILED],
+      routingKeys: ["infrastructure.test", WALLET_DEBITED, WALLET_DEBIT_FAILED, WALLET_CREDITED],
     });
 
     this.subscriber.subscribe("infrastructure.test", async (envelope) => {
@@ -66,9 +69,23 @@ export class WalletDebitFailedHandler implements OnModuleInit {
   }
 }
 
+@Injectable()
+export class WalletCreditedHandler implements OnModuleInit {
+  public constructor(
+    private readonly subscriber: RabbitMqSubscriber,
+    private readonly processWalletCreditedUseCase: ProcessWalletCreditedUseCase,
+  ) {}
+
+  public async onModuleInit(): Promise<void> {
+    this.subscriber.subscribe<WalletCreditedPayload>(WALLET_CREDITED, async (envelope) => {
+      await this.processWalletCreditedUseCase.execute(envelope.event.payload.betId);
+    });
+  }
+}
+
 @Module({
   imports: [MessagingModule.forRoot(), forwardRef(() => ApplicationModule)],
-  providers: [TestEventHandler, WalletDebitedHandler, WalletDebitFailedHandler],
+  providers: [TestEventHandler, WalletDebitedHandler, WalletDebitFailedHandler, WalletCreditedHandler],
   exports: [MessagingModule],
 })
 export class MessagingInfrastructureModule {}

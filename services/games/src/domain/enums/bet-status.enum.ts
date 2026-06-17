@@ -3,4 +3,5 @@ export enum BetStatus {
   Accepted = "ACCEPTED",
   Rejected = "REJECTED",
   CashedOut = "CASHED_OUT",
+  Lost = "LOST",
 }

@@ -66,4 +66,52 @@ export class BetWebSocketNotifier {
 
     await this.eventBroadcaster.emitTo(socket.id, WebSocketBetEvents.Updated, payload);
   }
+
+  public async notifyUpdatedLost(bet: Bet): Promise<void> {
+    const socketId = bet.socketId;
+
+    if (socketId === null || socketId.trim().length === 0) {
+      this.logger.debug(`Bet ${bet.id} has no socketId; skipping bet.updated LOST emit`);
+      return;
+    }
+
+    const payload: BetUpdatedWebSocketPayload = {
+      betId: bet.id,
+      userId: bet.playerId,
+      roundId: bet.roundId,
+      status: "LOST",
+      multiplier: null,
+      payout: null,
+      cashedOutAt: null,
+    };
+
+    await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
+  }
+
+  public async notifyWalletCredited(bet: Bet): Promise<void> {
+    const socketId = bet.socketId;
+
+    if (socketId === null || socketId.trim().length === 0) {
+      this.logger.debug(`Bet ${bet.id} has no socketId; skipping wallet credited emit`);
+      return;
+    }
+
+    if (bet.cashoutMultiplier === null || bet.payoutAmount === null || bet.cashedOutAt === null) {
+      this.logger.debug(`Bet ${bet.id} is missing cashout details; skipping wallet credited emit`);
+      return;
+    }
+
+    const payload: BetUpdatedWebSocketPayload = {
+      betId: bet.id,
+      userId: bet.playerId,
+      roundId: bet.roundId,
+      status: "CASHED_OUT",
+      multiplier: bet.cashoutMultiplier.value,
+      payout: Number(bet.payoutAmount.value) / 100,
+      cashedOutAt: bet.cashedOutAt.toISOString(),
+      walletCredited: true,
+    };
+
+    await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
+  }
 }

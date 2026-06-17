@@ -1,4 +1,5 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
 import { EventPanel } from "@/components/validation/event-panel";
 import { RoundStatusPanel } from "@/components/validation/round-status-panel";
@@ -10,15 +11,24 @@ import { useEventLog } from "@/hooks/use-event-log";
 import { usePlaceBet } from "@/hooks/use-place-bet";
 import { useRoundState } from "@/hooks/use-round-state";
 import { useValidationWebSocket } from "@/hooks/use-validation-websocket";
+import { WebSocketEvents } from "@/services/websocket/events";
 import { websocketService } from "@/services/websocket/websocket.service";
+import type { BetUpdatedWebSocketPayload } from "@/types/game.types";
 
 export function CrashGamePage() {
+  const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const { entries, append, clear, scrollRef } = useEventLog();
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
+  const betStateRef = useRef(betState);
+  betStateRef.current = betState;
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
   const { cashout, isCashingOut, handleCashoutEvent } = useCashout({ append });
+
+  const refreshWallet = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["wallet", "me"] });
+  }, [queryClient]);
 
   const handlePlaceBetSuccess = useCallback(
     (response: { betId: string }) => {
@@ -38,11 +48,23 @@ export function CrashGamePage() {
       handleBetEvent(event, payload);
       handleCashoutEvent(event, payload);
 
+      if (event === WebSocketEvents.RoundCrashed && betStateRef.current.status === "CASHED_OUT") {
+        refreshWallet();
+      }
+
+      if (event === WebSocketEvents.BetUpdated && typeof payload === "object" && payload !== null) {
+        const updated = payload as BetUpdatedWebSocketPayload;
+
+        if (updated.walletCredited === true) {
+          refreshWallet();
+        }
+      }
+
       if (event === "round.finished" || event === "round.betting-opened") {
         resetBetState();
       }
     },
-    [handleBetEvent, handleCashoutEvent, handleRoundEvent, resetBetState],
+    [handleBetEvent, handleCashoutEvent, handleRoundEvent, refreshWallet, resetBetState],
   );
 
   useValidationWebSocket({ append, onEvent: handleWebSocketEvent });

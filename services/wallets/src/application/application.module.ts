@@ -6,6 +6,7 @@ import { CreditWalletUseCase } from "./use-cases/credit-wallet/credit-wallet.use
 import { DebitWalletUseCase } from "./use-cases/debit-wallet/debit-wallet.use-case";
 import { GetWalletByPlayerIdUseCase } from "./use-cases/get-wallet-by-player-id/get-wallet-by-player-id.use-case";
 import { ProcessBetPlacedUseCase } from "./use-cases/process-bet-placed/process-bet-placed.use-case";
+import { ProcessBetCashedOutUseCase } from "./use-cases/process-bet-cashed-out/process-bet-cashed-out.use-case";
 
 @Module({
   imports: [PersistenceModule, forwardRef(() => MessagingInfrastructureModule)],
@@ -15,6 +16,7 @@ import { ProcessBetPlacedUseCase } from "./use-cases/process-bet-placed/process-
     CreditWalletUseCase,
     DebitWalletUseCase,
     ProcessBetPlacedUseCase,
+    ProcessBetCashedOutUseCase,
   ],
   exports: [
     CreateWalletUseCase,
@@ -22,6 +24,7 @@ import { ProcessBetPlacedUseCase } from "./use-cases/process-bet-placed/process-
     CreditWalletUseCase,
     DebitWalletUseCase,
     ProcessBetPlacedUseCase,
+    ProcessBetCashedOutUseCase,
   ],
 })
 export class ApplicationModule {}

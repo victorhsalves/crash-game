@@ -15,7 +15,9 @@ import { OpenRoundBettingUseCase } from "./use-cases/open-round-betting/open-rou
 import { PlaceBetUseCase } from "./use-cases/place-bet/place-bet.use-case";
 import { ProcessWalletDebitedUseCase } from "./use-cases/process-wallet-debited/process-wallet-debited.use-case";
 import { ProcessWalletDebitFailedUseCase } from "./use-cases/process-wallet-debit-failed/process-wallet-debit-failed.use-case";
+import { ProcessWalletCreditedUseCase } from "./use-cases/process-wallet-credited/process-wallet-credited.use-case";
 import { RecoverRoundLifecycleUseCase } from "./use-cases/recover-round-lifecycle/recover-round-lifecycle.use-case";
+import { SettleRoundBetsUseCase } from "./use-cases/settle-round-bets/settle-round-bets.use-case";
 import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case";
 
 @Module({
@@ -33,6 +35,8 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
     GetBetByIdUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,
+    ProcessWalletCreditedUseCase,
+    SettleRoundBetsUseCase,
     CreateGameRoundUseCase,
     OpenRoundBettingUseCase,
     StartRoundUseCase,
@@ -48,6 +52,8 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
     GetBetByIdUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,
+    ProcessWalletCreditedUseCase,
+    SettleRoundBetsUseCase,
     CreateGameRoundUseCase,
     OpenRoundBettingUseCase,
     StartRoundUseCase,

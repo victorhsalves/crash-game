@@ -29,10 +29,11 @@ export interface BetUpdatedWebSocketPayload {
   betId: string;
   userId: string;
   roundId: string;
-  status: "CASHED_OUT";
-  multiplier: number;
-  payout: number;
-  cashedOutAt: string;
+  status: "CASHED_OUT" | "LOST";
+  multiplier: number | null;
+  payout: number | null;
+  cashedOutAt: string | null;
+  walletCredited?: boolean;
 }
 
 export interface BetCashoutFailedWebSocketPayload {
