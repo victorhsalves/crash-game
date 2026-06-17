@@ -10,3 +10,8 @@ export interface CurrentGameRound {
   crashedAt: string | null;
   createdAt: string;
 }
+
+export interface PlaceBetResponse {
+  betId: string;
+  status: "PENDING";
+}
