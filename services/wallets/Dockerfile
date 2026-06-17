@@ -15,4 +15,4 @@ WORKDIR /app/services/wallets
 
 EXPOSE 4002
 
-CMD ["bun", "run", "src/main.ts"]
+CMD ["bun", "run", "start:docker"]

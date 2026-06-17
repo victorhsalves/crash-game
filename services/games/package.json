@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "bun run --watch src/main.ts",
     "start": "bun run src/main.ts",
+    "start:docker": "bun run migration:run && bun run start",
     "test": "bun test tests/unit",
     "test:e2e": "bun test tests/e2e",
     "typeorm": "bun run node_modules/typeorm/cli.js -d src/infrastructure/persistence/typeorm/data-source.ts",

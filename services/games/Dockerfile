@@ -16,4 +16,4 @@ WORKDIR /app/services/games
 
 EXPOSE 4001
 
-CMD ["bun", "run", "src/main.ts"]
+CMD ["bun", "run", "start:docker"]
