@@ -1,0 +1,1 @@
+export const EVENT_BROADCASTER = Symbol("EVENT_BROADCASTER");
