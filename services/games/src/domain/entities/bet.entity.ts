@@ -133,8 +133,8 @@ export class Bet {
   }
 
   public cashout(multiplier: Multiplier): CashoutRequestedEvent {
-    if (this.betStatus !== BetStatus.Pending) {
-      throw new DomainError("Only a pending bet can be cashed out.");
+    if (this.betStatus !== BetStatus.Accepted) {
+      throw new DomainError("Only an accepted bet can be cashed out.");
     }
 
     const cashedOutAt = new Date();
@@ -159,11 +159,19 @@ export class Bet {
     );
   }
 
-  public lose(): void {
+  public accept(): void {
     if (this.betStatus !== BetStatus.Pending) {
-      throw new DomainError("Only a pending bet can be lost.");
+      return;
     }
 
-    this.betStatus = BetStatus.Lost;
+    this.betStatus = BetStatus.Accepted;
+  }
+
+  public reject(): void {
+    if (this.betStatus !== BetStatus.Pending) {
+      return;
+    }
+
+    this.betStatus = BetStatus.Rejected;
   }
 }

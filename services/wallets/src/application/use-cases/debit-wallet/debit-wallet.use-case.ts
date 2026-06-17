@@ -1,5 +1,5 @@
 import { Money } from "@crash/money";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { WalletTransaction } from "../../../domain/entities/wallet-transaction.entity";
 import { Wallet } from "../../../domain/entities/wallet.entity";
 import { TransactionType } from "../../../domain/enums/transaction-type.enum";
@@ -16,6 +16,7 @@ export interface DebitWalletResult {
 
 @Injectable()
 export class DebitWalletUseCase {
+  private readonly logger = new Logger(DebitWalletUseCase.name);
   public constructor(
     @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: UnitOfWork,
@@ -42,6 +43,7 @@ export class DebitWalletUseCase {
       const amount = Money.fromCents(BigInt(input.amountCents));
 
       wallet.debit(amount, referenceId);
+      this.logger.log(`[messaging] debiting wallet ${wallet.id} with amount ${amount.value}`);
 
       const transaction = new WalletTransaction({
         id: crypto.randomUUID(),
