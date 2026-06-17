@@ -1,8 +1,9 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
 import { EventPanel } from "@/components/validation/event-panel";
 import { RoundStatusPanel } from "@/components/validation/round-status-panel";
+import { WalletBar } from "@/components/validation/wallet-bar";
 import { useAuth } from "@/hooks/use-auth";
 import { useBetAmount } from "@/hooks/use-bet-amount";
 import { useBetState } from "@/hooks/use-bet-state";
@@ -21,8 +22,6 @@ export function CrashGamePage() {
   const { entries, append, clear, scrollRef } = useEventLog();
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
-  const betStateRef = useRef(betState);
-  betStateRef.current = betState;
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
   const { cashout, isCashingOut, handleCashoutEvent } = useCashout({ append });
 
@@ -48,7 +47,11 @@ export function CrashGamePage() {
       handleBetEvent(event, payload);
       handleCashoutEvent(event, payload);
 
-      if (event === WebSocketEvents.RoundCrashed && betStateRef.current.status === "CASHED_OUT") {
+      if (event === WebSocketEvents.BetAccepted) {
+        refreshWallet();
+      }
+
+      if (event === WebSocketEvents.RoundCrashed) {
         refreshWallet();
       }
 
@@ -77,7 +80,8 @@ export function CrashGamePage() {
   }, [amount, placeBet]);
 
   return (
-    <div className="-mx-6 -my-8 flex h-[calc(100vh-65px)] flex-col">
+    <div className="-mx-6 -my-8 flex h-[calc(100vh-113px)] flex-col">
+      <WalletBar />
       <RoundStatusPanel roundState={roundState} remainingSeconds={remainingSeconds} />
       <EventPanel entries={entries} scrollRef={scrollRef} onClear={clear} />
       <ActionPanel
