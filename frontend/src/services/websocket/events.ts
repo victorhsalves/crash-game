@@ -7,5 +7,6 @@ export const WebSocketEvents = {
   BetCashoutFailed: "bet.cashout.failed",
   RoundBettingOpened: "round.betting-opened",
   RoundRunning: "round.running",
+  RoundCrashed: "round.crashed",
   RoundFinished: "round.finished",
 } as const;

@@ -1,5 +1,7 @@
 export type GameRoundStatus = "WAITING" | "BETTING" | "RUNNING" | "CRASHED" | "FINISHED";
 
+export const ROUND_CRASHED_DURATION_MS = 10_000;
+
 export interface CurrentGameRound {
   id: string;
   status: GameRoundStatus;
@@ -7,8 +9,8 @@ export interface CurrentGameRound {
   crashPoint: string | null;
   bettingEndsAt: string | null;
   startedAt: string | null;
-  runningEndsAt: string | null;
   crashedAt: string | null;
+  finishedAt: string | null;
   createdAt: string;
 }
 
@@ -25,14 +27,19 @@ export interface RoundBettingOpenedWebSocketPayload {
 
 export interface RoundRunningWebSocketPayload {
   roundId: string;
-  status: "RUNNING";
   startedAt: string;
-  runningEndsAt: string;
+  serverTime: string;
+  growthFactor: number;
+}
+
+export interface RoundCrashedWebSocketPayload {
+  roundId: string;
+  crashPoint: number;
+  crashedAt: string;
 }
 
 export interface RoundFinishedWebSocketPayload {
   roundId: string;
-  status: "FINISHED";
   finishedAt: string;
 }
 

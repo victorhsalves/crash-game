@@ -5,18 +5,24 @@ import type {
   CurrentGameRound,
   GameRoundStatus,
   RoundBettingOpenedWebSocketPayload,
+  RoundCrashedWebSocketPayload,
   RoundFinishedWebSocketPayload,
   RoundRunningWebSocketPayload,
   RoundState,
 } from "@/types/game.types";
+import { ROUND_CRASHED_DURATION_MS } from "@/types/game.types";
+
+function crashedPhaseEndsAt(crashedAt: string): Date {
+  return new Date(new Date(crashedAt).getTime() + ROUND_CRASHED_DURATION_MS);
+}
 
 function parsePhaseEndsAt(status: GameRoundStatus, round: CurrentGameRound): Date | null {
   if (status === "BETTING" && round.bettingEndsAt) {
     return new Date(round.bettingEndsAt);
   }
 
-  if (status === "RUNNING" && round.runningEndsAt) {
-    return new Date(round.runningEndsAt);
+  if (status === "CRASHED" && round.crashedAt) {
+    return crashedPhaseEndsAt(round.crashedAt);
   }
 
   return null;
@@ -59,7 +65,8 @@ export function useRoundState() {
 
     const updateRemaining = () => {
       const diffMs = roundState.phaseEndsAt!.getTime() - Date.now();
-      setRemainingSeconds(Math.max(0, Math.ceil(diffMs / 1000)));
+      const seconds = Math.max(0, Math.ceil(diffMs / 1000));
+      setRemainingSeconds(Number.isFinite(seconds) ? seconds : null);
     };
 
     updateRemaining();
@@ -85,7 +92,17 @@ export function useRoundState() {
         setRoundState({
           roundId: data.roundId,
           status: "RUNNING",
-          phaseEndsAt: new Date(data.runningEndsAt),
+          phaseEndsAt: null,
+        });
+        return;
+      }
+
+      if (event === WebSocketEvents.RoundCrashed) {
+        const data = payload as RoundCrashedWebSocketPayload;
+        setRoundState({
+          roundId: data.roundId,
+          status: "CRASHED",
+          phaseEndsAt: crashedPhaseEndsAt(data.crashedAt),
         });
         return;
       }

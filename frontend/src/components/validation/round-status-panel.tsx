@@ -14,7 +14,7 @@ const statusLabel: Record<GameRoundStatus, string> = {
 };
 
 function formatCountdown(seconds: number | null): string {
-  if (seconds === null) {
+  if (seconds === null || !Number.isFinite(seconds)) {
     return "--:--";
   }
 
@@ -25,7 +25,7 @@ function formatCountdown(seconds: number | null): string {
 
 export function RoundStatusPanel({ roundState, remainingSeconds }: RoundStatusPanelProps) {
   const { roundId, status } = roundState;
-  const showCountdown = status === "BETTING" || status === "RUNNING";
+  const showCountdown = status === "BETTING" || status === "RUNNING" || status === "CRASHED";
 
   return (
     <div className="shrink-0 border-b border-border px-4 py-3">
