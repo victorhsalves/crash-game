@@ -6,6 +6,7 @@ import { useBetAmount } from "@/hooks/use-bet-amount";
 import { useEventLog } from "@/hooks/use-event-log";
 import { usePlaceBet } from "@/hooks/use-place-bet";
 import { useValidationWebSocket } from "@/hooks/use-validation-websocket";
+import { websocketService } from "@/services/websocket/websocket.service";
 
 export function CrashGamePage() {
   const { isAuthenticated } = useAuth();
@@ -16,7 +17,10 @@ export function CrashGamePage() {
   useValidationWebSocket({ append });
 
   const handlePlaceBet = useCallback(() => {
-    placeBet(amount * 100);
+    placeBet({
+      amountCents: amount * 100,
+      socketId: websocketService.getSocketId(),
+    });
   }, [amount, placeBet]);
 
   return (

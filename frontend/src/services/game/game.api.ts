@@ -6,7 +6,10 @@ export const gameApi = {
     return apiClient.get<CurrentGameRound>("/games/rounds/current");
   },
 
-  placeBet(amountCents: number): Promise<PlaceBetResponse> {
-    return apiClient.post<PlaceBetResponse>("/games/bet", { amountCents });
+  placeBet(amountCents: number, socketId?: string): Promise<PlaceBetResponse> {
+    return apiClient.post<PlaceBetResponse>("/games/bet", {
+      amountCents,
+      ...(socketId !== undefined ? { socketId } : {}),
+    });
   },
 };

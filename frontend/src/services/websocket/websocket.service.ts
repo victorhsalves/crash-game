@@ -52,6 +52,10 @@ class WebSocketService {
     });
   }
 
+  public getSocketId(): string | undefined {
+    return this.socket?.id;
+  }
+
   public disconnect(): void {
     if (this.socket) {
       this.socket.disconnect();
