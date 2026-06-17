@@ -1,0 +1,24 @@
+{
+  "name": "@crash/messaging",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.17",
+    "amqplib": "^0.10.9",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "bun-types": "latest",
+    "typescript": "^5.8.3"
+  }
+}

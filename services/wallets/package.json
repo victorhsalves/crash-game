@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@crash/auth": "workspace:*",
+    "@crash/messaging": "workspace:*",
     "@crash/money": "workspace:*",
     "@nestjs/common": "^11.1.17",
     "@nestjs/core": "^11.1.17",
