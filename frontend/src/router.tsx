@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
+import { WebSocketTestPage } from "@/pages/dev/websocket-test-page";
 import { HomePage } from "@/pages/home/home-page";
 import { useAuthStore } from "@/stores/auth.store";
 
@@ -44,7 +45,13 @@ const dashboardRoute = createRoute({
   component: DashboardPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute]);
+const websocketTestRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dev/websocket",
+  component: WebSocketTestPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, dashboardRoute, websocketTestRoute]);
 
 export const router = createRouter({ routeTree });
 
