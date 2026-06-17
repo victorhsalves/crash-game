@@ -41,3 +41,28 @@ export interface RoundState {
   status: GameRoundStatus | null;
   phaseEndsAt: Date | null;
 }
+
+export type BetStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CASHED_OUT";
+
+export interface BetState {
+  betId: string | null;
+  status: BetStatus | null;
+  multiplier: number | null;
+  payout: number | null;
+  cashedOutAt: string | null;
+}
+
+export interface BetUpdatedWebSocketPayload {
+  betId: string;
+  userId: string;
+  roundId: string;
+  status: "CASHED_OUT";
+  multiplier: number;
+  payout: number;
+  cashedOutAt: string;
+}
+
+export interface BetCashoutFailedWebSocketPayload {
+  code: string;
+  message: string;
+}

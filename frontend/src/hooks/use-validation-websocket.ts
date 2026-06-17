@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { websocketService } from "@/services/websocket/websocket.service";
 import type { EventLogSource } from "@/types/event-log.types";
 
@@ -8,29 +8,37 @@ interface UseValidationWebSocketOptions {
 }
 
 export function useValidationWebSocket({ append, onEvent }: UseValidationWebSocketOptions): void {
+  const appendRef = useRef(append);
+  const onEventRef = useRef(onEvent);
+
+  useEffect(() => {
+    appendRef.current = append;
+    onEventRef.current = onEvent;
+  });
+
   useEffect(() => {
     const url = import.meta.env.VITE_WS_URL;
 
     websocketService.subscribe({
       onConnect: (payload) => {
-        append("system", "connected", payload);
+        appendRef.current("system", "connected", payload);
       },
       onDisconnect: (payload) => {
-        append("system", "disconnected", payload);
+        appendRef.current("system", "disconnected", payload);
       },
       onConnectError: (payload) => {
-        append("system", "connection error", payload);
+        appendRef.current("system", "connection error", payload);
       },
       onEvent: (event, payload) => {
-        append("ws", event, payload);
-        onEvent?.(event, payload);
+        appendRef.current("ws", event, payload);
+        onEventRef.current?.(event, payload);
       },
     });
 
-    websocketService.connect(url);
+    void websocketService.connect(url);
 
     return () => {
       websocketService.disconnect();
     };
-  }, [append, onEvent]);
+  }, []);
 }

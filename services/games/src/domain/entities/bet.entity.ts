@@ -2,7 +2,7 @@ import { Money } from "@crash/money";
 import { BetStatus } from "../enums/bet-status.enum";
 import { DomainError } from "../errors/domain-error";
 import { BetPlacedEvent } from "../events/bet-placed.event";
-import { CashoutRequestedEvent } from "../events/cashout-requested.event";
+import { BetCashedOutEvent } from "../events/bet-cashed-out.event";
 import { Multiplier } from "../value-objects/multiplier.value-object";
 
 export interface BetProps {
@@ -140,12 +140,20 @@ export class Bet {
     return this.betSocketId;
   }
 
-  public cashout(multiplier: Multiplier): CashoutRequestedEvent {
-    if (this.betStatus !== BetStatus.Accepted) {
+  public canCashout(): boolean {
+    return this.betStatus === BetStatus.Accepted;
+  }
+
+  public cashout(multiplier: Multiplier, at: Date): BetCashedOutEvent {
+    if (this.betStatus === BetStatus.CashedOut) {
+      return this.buildCashedOutEvent();
+    }
+
+    if (!this.canCashout()) {
       throw new DomainError("Only an accepted bet can be cashed out.");
     }
 
-    const cashedOutAt = new Date();
+    const cashedOutAt = new Date(at.getTime());
     const payoutAmount = Money.fromCents(
       (this.betAmount.value * BigInt(multiplier.valueInBasisPoints)) / BigInt(Multiplier.Scale),
     );
@@ -155,16 +163,7 @@ export class Bet {
     this.betPayoutAmount = payoutAmount;
     this.betCashedOutAt = cashedOutAt;
 
-    return new CashoutRequestedEvent(
-      {
-        betId: this.betId,
-        playerId: this.betPlayerId,
-        roundId: this.betRoundId,
-        cashoutMultiplier: multiplier.value,
-        payoutAmountCents: payoutAmount.value,
-      },
-      cashedOutAt,
-    );
+    return this.buildCashedOutEvent();
   }
 
   public accept(): void {
@@ -181,5 +180,25 @@ export class Bet {
     }
 
     this.betStatus = BetStatus.Rejected;
+  }
+
+  private buildCashedOutEvent(): BetCashedOutEvent {
+    if (
+      this.betCashoutMultiplier === null ||
+      this.betPayoutAmount === null ||
+      this.betCashedOutAt === null
+    ) {
+      throw new DomainError("Cashed out bet is missing cashout details.");
+    }
+
+    return new BetCashedOutEvent({
+      betId: this.betId,
+      playerId: this.betPlayerId,
+      roundId: this.betRoundId,
+      amount: this.betAmount.value,
+      cashoutMultiplier: this.betCashoutMultiplier.value,
+      payoutAmount: this.betPayoutAmount.value,
+      cashedOutAt: this.betCashedOutAt,
+    });
   }
 }

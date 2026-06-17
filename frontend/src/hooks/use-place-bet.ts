@@ -3,6 +3,8 @@ import { ApiError } from "@/services/api/api-error";
 import { gameApi } from "@/services/game/game.api";
 import type { EventLogSource } from "@/types/event-log.types";
 
+import type { PlaceBetResponse } from "@/types/game.types";
+
 interface PlaceBetVariables {
   amountCents: number;
   socketId?: string;
@@ -10,6 +12,7 @@ interface PlaceBetVariables {
 
 interface UsePlaceBetOptions {
   append: (source: EventLogSource, event: string, payload?: unknown) => void;
+  onSuccess?: (response: PlaceBetResponse) => void;
 }
 
 function parseApiError(error: unknown): unknown {
@@ -24,12 +27,13 @@ function parseApiError(error: unknown): unknown {
   }
 }
 
-export function usePlaceBet({ append }: UsePlaceBetOptions) {
+export function usePlaceBet({ append, onSuccess }: UsePlaceBetOptions) {
   const mutation = useMutation({
     mutationFn: ({ amountCents, socketId }: PlaceBetVariables) =>
       gameApi.placeBet(amountCents, socketId),
     onSuccess: (response) => {
       append("api", "placeBet", response);
+      onSuccess?.(response);
     },
     onError: (error) => {
       append("api", "placeBet.error", parseApiError(error));

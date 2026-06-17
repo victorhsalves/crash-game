@@ -2,7 +2,9 @@ import { Module, forwardRef } from "@nestjs/common";
 import { CrashModule } from "../infrastructure/crash/crash.module";
 import { PersistenceModule } from "../infrastructure/persistence/persistence.module";
 import { MessagingInfrastructureModule } from "../infrastructure/messaging/messaging.module";
+import { TimeModule } from "../infrastructure/time/time.module";
 import { WebSocketInfrastructureModule } from "../infrastructure/websocket/websocket.module";
+import { CashoutBetUseCase } from "./use-cases/cashout-bet/cashout-bet.use-case";
 import { CrashRoundUseCase } from "./use-cases/crash-round/crash-round.use-case";
 import { CreateGameRoundUseCase } from "./use-cases/create-game-round/create-game-round.use-case";
 import { EnsureNextRoundWaitingUseCase } from "./use-cases/ensure-next-round-waiting/ensure-next-round-waiting.use-case";
@@ -20,12 +22,14 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
   imports: [
     PersistenceModule,
     CrashModule,
-    WebSocketInfrastructureModule,
+    TimeModule,
+    forwardRef(() => WebSocketInfrastructureModule),
     forwardRef(() => MessagingInfrastructureModule),
   ],
   providers: [
     GetCurrentRoundUseCase,
     PlaceBetUseCase,
+    CashoutBetUseCase,
     GetBetByIdUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,
@@ -40,6 +44,7 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
   exports: [
     GetCurrentRoundUseCase,
     PlaceBetUseCase,
+    CashoutBetUseCase,
     GetBetByIdUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,

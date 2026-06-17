@@ -4,5 +4,7 @@ export { buildAuthConfig } from "./infrastructure/auth-config";
 export { JwtStrategy } from "./infrastructure/jwt.strategy";
 export { CurrentUser } from "./presentation/current-user.decorator";
 export { JwtAuthGuard } from "./presentation/jwt-auth.guard";
+export { SocketJwtAuthService } from "./presentation/socket-jwt-auth.service";
+export { WsJwtGuard } from "./presentation/ws-jwt.guard";
 export { AuthController } from "./presentation/auth.controller";
 export { AuthModule } from "./auth.module";

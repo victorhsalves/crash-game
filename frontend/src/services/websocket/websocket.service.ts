@@ -1,3 +1,4 @@
+import { authService } from "@/services/auth/auth.service";
 import { io, type Socket } from "socket.io-client";
 
 export interface WebSocketLifecyclePayload {
@@ -21,7 +22,7 @@ class WebSocketService {
     this.handlers = handlers;
   }
 
-  public connect(url: string): void {
+  public async connect(url: string): Promise<void> {
     if (this.socket?.connected) {
       return;
     }
@@ -31,7 +32,12 @@ class WebSocketService {
       this.socket = null;
     }
 
-    const socket = io(url);
+    const token = await authService.getAccessToken();
+    const socket = io(url, {
+      auth: {
+        token: token ?? "",
+      },
+    });
     this.socket = socket;
 
     socket.on("connect", () => {
@@ -50,6 +56,10 @@ class WebSocketService {
       const payload = args.length === 1 ? args[0] : args;
       this.handlers.onEvent?.(event, payload);
     });
+  }
+
+  public emit(event: string, payload?: unknown): void {
+    this.socket?.emit(event, payload);
   }
 
   public getSocketId(): string | undefined {

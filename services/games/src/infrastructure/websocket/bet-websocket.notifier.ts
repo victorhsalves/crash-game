@@ -1,11 +1,14 @@
 import { EVENT_BROADCASTER, type EventBroadcaster } from "@crash/websocket";
 import type { DebitFailureReason } from "@crash/messaging";
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import type { CashoutBetResult } from "../../application/use-cases/cashout-bet/cashout-bet.input";
 import type { Bet } from "../../domain/entities/bet.entity";
+import type { AuthenticatedSocket } from "./authenticated-socket";
 import {
   WebSocketBetEvents,
   type BetAcceptedWebSocketPayload,
   type BetRejectedWebSocketPayload,
+  type BetUpdatedWebSocketPayload,
 } from "./contracts/websocket-bet-events";
 
 @Injectable()
@@ -48,5 +51,19 @@ export class BetWebSocketNotifier {
     };
 
     await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Rejected, payload);
+  }
+
+  public async notifyUpdated(socket: AuthenticatedSocket, result: CashoutBetResult): Promise<void> {
+    const payload: BetUpdatedWebSocketPayload = {
+      betId: result.betId,
+      userId: result.userId,
+      roundId: result.roundId,
+      status: "CASHED_OUT",
+      multiplier: result.multiplier,
+      payout: result.payout,
+      cashedOutAt: result.cashedOutAt.toISOString(),
+    };
+
+    await this.eventBroadcaster.emitTo(socket.id, WebSocketBetEvents.Updated, payload);
   }
 }

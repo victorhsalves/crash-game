@@ -1,21 +1,23 @@
 import type { DomainEvent } from "../shared/domain-event";
 
-export interface CashoutRequestedPayload {
+export interface BetCashedOutPayload {
   readonly betId: string;
-  readonly playerId: string;
   readonly roundId: string;
+  readonly playerId: string;
+  readonly amount: bigint;
   readonly cashoutMultiplier: number;
-  readonly payoutAmountCents: bigint;
+  readonly payoutAmount: bigint;
+  readonly cashedOutAt: Date;
 }
 
-export class CashoutRequestedEvent implements DomainEvent<CashoutRequestedPayload> {
+export class BetCashedOutEvent implements DomainEvent<BetCashedOutPayload> {
   public readonly eventId: string;
   public readonly occurredAt: Date;
-  public readonly payload: CashoutRequestedPayload;
+  public readonly payload: BetCashedOutPayload;
 
   public constructor(
-    payload: CashoutRequestedPayload,
-    occurredAt: Date = new Date(),
+    payload: BetCashedOutPayload,
+    occurredAt: Date = payload.cashedOutAt,
     eventId: string = crypto.randomUUID(),
   ) {
     this.eventId = eventId;
