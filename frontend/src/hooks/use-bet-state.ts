@@ -4,6 +4,7 @@ import type { BetState, BetUpdatedWebSocketPayload } from "@/types/game.types";
 const initialBetState: BetState = {
   betId: null,
   status: null,
+  amountCents: null,
   multiplier: null,
   payout: null,
   cashedOutAt: null,
@@ -12,10 +13,11 @@ const initialBetState: BetState = {
 export function useBetState() {
   const [betState, setBetState] = useState<BetState>(initialBetState);
 
-  const setPendingBet = useCallback((betId: string) => {
+  const setPendingBet = useCallback((betId: string, amountCents: number) => {
     setBetState({
       betId,
       status: "PENDING",
+      amountCents,
       multiplier: null,
       payout: null,
       cashedOutAt: null,
@@ -41,13 +43,14 @@ export function useBetState() {
     if (event === "bet.updated" && typeof payload === "object" && payload !== null) {
       const updated = payload as BetUpdatedWebSocketPayload;
 
-      setBetState({
+      setBetState((current) => ({
         betId: updated.betId,
         status: updated.status,
+        amountCents: current.amountCents,
         multiplier: updated.multiplier,
         payout: updated.payout,
         cashedOutAt: updated.cashedOutAt,
-      });
+      }));
     }
   }, []);
 

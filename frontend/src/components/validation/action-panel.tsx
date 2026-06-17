@@ -29,6 +29,9 @@ export function ActionPanel({
   onPlaceBet,
   onCashout,
 }: ActionPanelProps) {
+  const canPlaceBet =
+    isAuthenticated && roundStatus === "BETTING" && !isPending && betStatus === null;
+
   const canCashout =
     isAuthenticated &&
     roundStatus === "RUNNING" &&
@@ -39,15 +42,12 @@ export function ActionPanel({
     <div className="flex shrink-0 flex-wrap items-center gap-3 border-t border-border bg-surface px-4 py-3">
       <BetAmountControl
         amount={amount}
+        disabled={!canPlaceBet}
         onIncrement={onIncrement}
         onDecrement={onDecrement}
         onChange={onAmountChange}
       />
-      <Button
-        variant="primary"
-        disabled={!isAuthenticated || isPending}
-        onClick={onPlaceBet}
-      >
+      <Button variant="primary" disabled={!canPlaceBet} onClick={onPlaceBet}>
         {isPending ? "Apostando..." : "Apostar"}
       </Button>
       <Button disabled={!canCashout} onClick={onCashout}>

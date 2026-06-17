@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
+import { CrashGameStage } from "@/components/validation/crash-game-stage";
 import { EventLogModal } from "@/components/validation/event-log-modal";
-import { MultiplierDisplay } from "@/components/validation/multiplier-display";
 import { RoundStatusPanel } from "@/components/validation/round-status-panel";
 import { WalletBar } from "@/components/validation/wallet-bar";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,7 +28,14 @@ export function CrashGamePage() {
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
   const { displayValue, handleMultiplierEvent, syncFromRound } = useCrashMultiplier();
-  const { cashout, isCashingOut, handleCashoutEvent } = useCashout({ append });
+  const {
+    cashout,
+    isCashingOut,
+    isPopupOpen,
+    cashoutMultiplier,
+    handleCashoutEvent,
+    handleRoundEventForPopup,
+  } = useCashout({ append });
 
   const refreshWallet = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ["wallet", "me"] });
@@ -40,9 +47,9 @@ export function CrashGamePage() {
 
   const handlePlaceBetSuccess = useCallback(
     (response: { betId: string }) => {
-      setPendingBet(response.betId);
+      setPendingBet(response.betId, amount * 100);
     },
-    [setPendingBet],
+    [amount, setPendingBet],
   );
 
   const { placeBet, isPending } = usePlaceBet({
@@ -56,6 +63,7 @@ export function CrashGamePage() {
       handleMultiplierEvent(event, payload);
       handleBetEvent(event, payload);
       handleCashoutEvent(event, payload);
+      handleRoundEventForPopup(event);
 
       if (event === WebSocketEvents.BetAccepted) {
         refreshWallet();
@@ -87,6 +95,7 @@ export function CrashGamePage() {
       handleCashoutEvent,
       handleMultiplierEvent,
       handleRoundEvent,
+      handleRoundEventForPopup,
       refreshWallet,
       resetBetState,
       syncFromRound,
@@ -119,7 +128,16 @@ export function CrashGamePage() {
         isEventLogOpen={isEventLogOpen}
         onToggleEventLog={handleToggleEventLog}
       />
-      <MultiplierDisplay value={displayValue} status={roundState.status} />
+      <CrashGameStage
+        multiplier={displayValue}
+        roundStatus={roundState.status}
+        isCashoutPopupOpen={isPopupOpen}
+        isCashingOut={isCashingOut}
+        cashoutMultiplier={cashoutMultiplier}
+        betAmountCents={betState.amountCents}
+        betStatus={betState.status}
+        betPayout={betState.payout}
+      />
       <ActionPanel
         amount={amount}
         isPending={isPending}

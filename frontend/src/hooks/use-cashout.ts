@@ -6,20 +6,29 @@ import type { EventLogSource } from "@/types/event-log.types";
 
 interface UseCashoutOptions {
   append: (source: EventLogSource, event: string, payload?: unknown) => void;
-  onUpdated?: (payload: BetUpdatedWebSocketPayload) => void;
-  onFailed?: (payload: BetCashoutFailedWebSocketPayload) => void;
 }
 
-export function useCashout({ append, onUpdated, onFailed }: UseCashoutOptions) {
+export function useCashout({ append }: UseCashoutOptions) {
   const [isCashingOut, setIsCashingOut] = useState(false);
   const [lastError, setLastError] = useState<BetCashoutFailedWebSocketPayload | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [cashoutMultiplier, setCashoutMultiplier] = useState<number | null>(null);
+
+  const closePopup = useCallback(() => {
+    setIsPopupOpen(false);
+    setCashoutMultiplier(null);
+  }, []);
 
   const handleCashoutEvent = useCallback(
     (event: string, payload: unknown) => {
       if (event === WebSocketEvents.BetUpdated) {
         setIsCashingOut(false);
         setLastError(null);
-        onUpdated?.(payload as BetUpdatedWebSocketPayload);
+
+        const updated = payload as BetUpdatedWebSocketPayload;
+        if (updated.status === "CASHED_OUT" && updated.multiplier !== null) {
+          setCashoutMultiplier(updated.multiplier);
+        }
         return;
       }
 
@@ -27,10 +36,19 @@ export function useCashout({ append, onUpdated, onFailed }: UseCashoutOptions) {
         setIsCashingOut(false);
         const errorPayload = payload as BetCashoutFailedWebSocketPayload;
         setLastError(errorPayload);
-        onFailed?.(errorPayload);
+        closePopup();
       }
     },
-    [onFailed, onUpdated],
+    [closePopup],
+  );
+
+  const handleRoundEventForPopup = useCallback(
+    (event: string) => {
+      if (event === WebSocketEvents.RoundCrashed || event === WebSocketEvents.RoundBettingOpened) {
+        closePopup();
+      }
+    },
+    [closePopup],
   );
 
   const cashout = useCallback(() => {
@@ -40,6 +58,8 @@ export function useCashout({ append, onUpdated, onFailed }: UseCashoutOptions) {
 
     setIsCashingOut(true);
     setLastError(null);
+    setIsPopupOpen(true);
+    setCashoutMultiplier(null);
     websocketService.emit(WebSocketEvents.BetCashout);
     append("ws", WebSocketEvents.BetCashout);
   }, [append, isCashingOut]);
@@ -48,6 +68,9 @@ export function useCashout({ append, onUpdated, onFailed }: UseCashoutOptions) {
     cashout,
     isCashingOut,
     lastError,
+    isPopupOpen,
+    cashoutMultiplier,
     handleCashoutEvent,
+    handleRoundEventForPopup,
   };
 }

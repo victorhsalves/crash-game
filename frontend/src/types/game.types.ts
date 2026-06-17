@@ -54,6 +54,7 @@ export type BetStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CASHED_OUT" | "LO
 export interface BetState {
   betId: string | null;
   status: BetStatus | null;
+  amountCents: number | null;
   multiplier: number | null;
   payout: number | null;
   cashedOutAt: string | null;
