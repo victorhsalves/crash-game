@@ -10,10 +10,12 @@ export class GameRoundMapper {
       id: entity.id,
       status: entity.status as RoundStatus,
       currentMultiplier: Multiplier.fromBasisPoints(entity.currentMultiplier),
-      crashPoint: CrashPoint.fromBasisPoints(entity.crashPoint),
+      crashPoint: entity.crashPoint !== null ? CrashPoint.fromBasisPoints(entity.crashPoint) : null,
+      crashAt: entity.crashAt,
       bettingEndsAt: entity.bettingEndsAt,
       startedAt: entity.startedAt,
       crashedAt: entity.crashedAt,
+      finishedAt: entity.finishedAt,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -25,10 +27,12 @@ export class GameRoundMapper {
     entity.id = round.id;
     entity.status = round.status;
     entity.currentMultiplier = round.currentMultiplier.valueInBasisPoints;
-    entity.crashPoint = round.crashPoint.valueInBasisPoints;
+    entity.crashPoint = round.crashPoint?.valueInBasisPoints ?? null;
+    entity.crashAt = round.crashAt;
     entity.bettingEndsAt = round.bettingEndsAt;
     entity.startedAt = round.startedAt;
     entity.crashedAt = round.crashedAt;
+    entity.finishedAt = round.finishedAt;
     entity.createdAt = round.createdAt;
     entity.updatedAt = round.updatedAt;
 

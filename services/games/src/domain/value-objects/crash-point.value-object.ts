@@ -2,7 +2,7 @@ import { DomainError } from "../errors/domain-error";
 import { Multiplier } from "./multiplier.value-object";
 
 export class CrashPoint {
-  private static readonly MinimumBasisPoints = 100;
+  private static readonly MinimumBasisPoints = 101;
 
   private readonly basisPoints: number;
 

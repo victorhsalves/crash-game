@@ -4,9 +4,10 @@ import type { EventLogSource } from "@/types/event-log.types";
 
 interface UseValidationWebSocketOptions {
   append: (source: EventLogSource, event: string, payload?: unknown) => void;
+  onEvent?: (event: string, payload: unknown) => void;
 }
 
-export function useValidationWebSocket({ append }: UseValidationWebSocketOptions): void {
+export function useValidationWebSocket({ append, onEvent }: UseValidationWebSocketOptions): void {
   useEffect(() => {
     const url = import.meta.env.VITE_WS_URL;
 
@@ -22,6 +23,7 @@ export function useValidationWebSocket({ append }: UseValidationWebSocketOptions
       },
       onEvent: (event, payload) => {
         append("ws", event, payload);
+        onEvent?.(event, payload);
       },
     });
 
@@ -30,5 +32,5 @@ export function useValidationWebSocket({ append }: UseValidationWebSocketOptions
     return () => {
       websocketService.disconnect();
     };
-  }, [append]);
+  }, [append, onEvent]);
 }

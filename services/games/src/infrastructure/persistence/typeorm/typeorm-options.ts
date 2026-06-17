@@ -4,6 +4,8 @@ import { GameRoundOrmEntity } from "./entities/game-round.orm-entity";
 import { InitialGamesSchema1750000000000 } from "./migrations/1750000000000-InitialGamesSchema";
 import { AddGameRoundTimestamps1750000000001 } from "./migrations/1750000000001-AddGameRoundTimestamps";
 import { AddBetSocketId1750000000002 } from "./migrations/1750000000002-AddBetSocketId";
+import { RoundLifecycleFields1750000000003 } from "./migrations/1750000000003-RoundLifecycleFields";
+import { AddCrashAtAndNullableCrashPoint1750000000004 } from "./migrations/1750000000004-AddCrashAtAndNullableCrashPoint";
 
 export function buildDataSourceOptions(): DataSourceOptions {
   const url = process.env.DATABASE_URL;
@@ -20,6 +22,8 @@ export function buildDataSourceOptions(): DataSourceOptions {
       InitialGamesSchema1750000000000,
       AddGameRoundTimestamps1750000000001,
       AddBetSocketId1750000000002,
+      RoundLifecycleFields1750000000003,
+      AddCrashAtAndNullableCrashPoint1750000000004,
     ],
     synchronize: false,
     migrationsRun: false,

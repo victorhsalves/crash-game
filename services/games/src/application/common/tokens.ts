@@ -1,2 +1,4 @@
 export const GAME_ROUND_REPOSITORY = Symbol("GAME_ROUND_REPOSITORY");
 export const BET_REPOSITORY = Symbol("BET_REPOSITORY");
+export const CRASH_POINT_GENERATOR = Symbol("CRASH_POINT_GENERATOR");
+export const CRASH_CURVE = Symbol("CRASH_CURVE");

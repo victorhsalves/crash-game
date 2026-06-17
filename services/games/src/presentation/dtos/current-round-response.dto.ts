@@ -13,6 +13,7 @@ export class CurrentRoundResponseDto {
   bettingEndsAt!: string | null;
   startedAt!: string | null;
   crashedAt!: string | null;
+  finishedAt!: string | null;
   createdAt!: string;
 
   public static fromDomain(gameRound: GameRound): CurrentRoundResponseDto {
@@ -25,12 +26,13 @@ export class CurrentRoundResponseDto {
         ? formatMultiplierValue(gameRound.currentMultiplier.value)
         : null;
     dto.crashPoint =
-      gameRound.status === RoundStatus.Crashed
-        ? formatMultiplierValue(gameRound.crashPoint.value)
+      gameRound.status === RoundStatus.Crashed || gameRound.status === RoundStatus.Finished
+        ? formatMultiplierValue(gameRound.crashPoint!.value)
         : null;
     dto.bettingEndsAt = gameRound.bettingEndsAt?.toISOString() ?? null;
     dto.startedAt = gameRound.startedAt?.toISOString() ?? null;
     dto.crashedAt = gameRound.crashedAt?.toISOString() ?? null;
+    dto.finishedAt = gameRound.finishedAt?.toISOString() ?? null;
     dto.createdAt = gameRound.createdAt.toISOString();
 
     return dto;

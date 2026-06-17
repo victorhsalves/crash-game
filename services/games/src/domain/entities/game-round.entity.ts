@@ -3,6 +3,7 @@ import { RoundFinishedEvent } from "../events/round-finished.event";
 import { RoundStartedEvent } from "../events/round-started.event";
 import { DomainError } from "../errors/domain-error";
 import { RoundStatus } from "../enums/round-status.enum";
+import type { CrashCurve } from "../services/crash-curve";
 import { AggregateRoot } from "../shared/aggregate-root";
 import { CrashPoint } from "../value-objects/crash-point.value-object";
 import { Multiplier } from "../value-objects/multiplier.value-object";
@@ -11,10 +12,12 @@ export interface GameRoundProps {
   readonly id: string;
   readonly status?: RoundStatus;
   readonly currentMultiplier?: Multiplier;
-  readonly crashPoint: CrashPoint;
+  readonly crashPoint?: CrashPoint | null;
+  readonly crashAt?: Date | null;
   readonly bettingEndsAt?: Date | null;
   readonly startedAt?: Date | null;
   readonly crashedAt?: Date | null;
+  readonly finishedAt?: Date | null;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }
@@ -23,12 +26,24 @@ export class GameRound extends AggregateRoot {
   private readonly roundId: string;
   private roundStatus: RoundStatus;
   private roundCurrentMultiplier: Multiplier;
-  private readonly roundCrashPoint: CrashPoint;
+  private roundCrashPoint: CrashPoint | null;
+  private roundCrashAt: Date | null;
   private roundBettingEndsAt: Date | null;
   private roundStartedAt: Date | null;
   private roundCrashedAt: Date | null;
+  private roundFinishedAt: Date | null;
   private readonly roundCreatedAt: Date;
   private roundUpdatedAt: Date;
+
+  public static create(props: { id: string }): GameRound {
+    return new GameRound({
+      id: props.id,
+      status: RoundStatus.Waiting,
+      crashPoint: null,
+      crashAt: null,
+      currentMultiplier: Multiplier.minimum(),
+    });
+  }
 
   public constructor(props: GameRoundProps) {
     super();
@@ -40,10 +55,12 @@ export class GameRound extends AggregateRoot {
     this.roundId = props.id;
     this.roundStatus = props.status ?? RoundStatus.Waiting;
     this.roundCurrentMultiplier = props.currentMultiplier ?? Multiplier.minimum();
-    this.roundCrashPoint = props.crashPoint;
+    this.roundCrashPoint = props.crashPoint ?? null;
+    this.roundCrashAt = props.crashAt ? new Date(props.crashAt.getTime()) : null;
     this.roundBettingEndsAt = props.bettingEndsAt ? new Date(props.bettingEndsAt.getTime()) : null;
     this.roundStartedAt = props.startedAt ? new Date(props.startedAt.getTime()) : null;
     this.roundCrashedAt = props.crashedAt ? new Date(props.crashedAt.getTime()) : null;
+    this.roundFinishedAt = props.finishedAt ? new Date(props.finishedAt.getTime()) : null;
     this.roundCreatedAt = props.createdAt ? new Date(props.createdAt.getTime()) : new Date();
     this.roundUpdatedAt = props.updatedAt ? new Date(props.updatedAt.getTime()) : new Date();
   }
@@ -60,8 +77,12 @@ export class GameRound extends AggregateRoot {
     return this.roundCurrentMultiplier;
   }
 
-  public get crashPoint(): CrashPoint {
+  public get crashPoint(): CrashPoint | null {
     return this.roundCrashPoint;
+  }
+
+  public get crashAt(): Date | null {
+    return this.roundCrashAt ? new Date(this.roundCrashAt.getTime()) : null;
   }
 
   public get bettingEndsAt(): Date | null {
@@ -74,6 +95,10 @@ export class GameRound extends AggregateRoot {
 
   public get crashedAt(): Date | null {
     return this.roundCrashedAt ? new Date(this.roundCrashedAt.getTime()) : null;
+  }
+
+  public get finishedAt(): Date | null {
+    return this.roundFinishedAt ? new Date(this.roundFinishedAt.getTime()) : null;
   }
 
   public get createdAt(): Date {
@@ -94,14 +119,17 @@ export class GameRound extends AggregateRoot {
     this.roundUpdatedAt = new Date();
   }
 
-  public start(): void {
+  public start(crashPoint: CrashPoint, curve: CrashCurve): void {
     if (this.roundStatus !== RoundStatus.Betting) {
       throw new DomainError("Only a betting round can be started.");
     }
 
     const startedAt = new Date();
+    const crashAt = curve.calculateCrashAt(startedAt, crashPoint);
 
     this.roundStatus = RoundStatus.Running;
+    this.roundCrashPoint = crashPoint;
+    this.roundCrashAt = crashAt;
     this.roundCurrentMultiplier = Multiplier.minimum();
     this.roundStartedAt = startedAt;
     this.roundUpdatedAt = startedAt;
@@ -122,6 +150,10 @@ export class GameRound extends AggregateRoot {
       throw new DomainError("Multiplier can only increase while the round is running.");
     }
 
+    if (this.roundCrashPoint === null) {
+      throw new DomainError("Crash point must be defined while the round is running.");
+    }
+
     if (!nextMultiplier.isGreaterThan(this.roundCurrentMultiplier)) {
       throw new DomainError("Next multiplier must be greater than the current multiplier.");
     }
@@ -137,6 +169,10 @@ export class GameRound extends AggregateRoot {
   public crash(): void {
     if (this.roundStatus !== RoundStatus.Running) {
       throw new DomainError("Only a running round can crash.");
+    }
+
+    if (this.roundCrashPoint === null) {
+      throw new DomainError("Crash point must be defined before crashing the round.");
     }
 
     const crashedAt = new Date();
@@ -166,6 +202,7 @@ export class GameRound extends AggregateRoot {
     const finishedAt = new Date();
 
     this.roundStatus = RoundStatus.Finished;
+    this.roundFinishedAt = finishedAt;
     this.roundUpdatedAt = finishedAt;
 
     this.addEvent(

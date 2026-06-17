@@ -11,8 +11,11 @@ export class GameRoundOrmEntity {
   @Column({ name: "current_multiplier", type: "int" })
   public currentMultiplier!: number;
 
-  @Column({ name: "crash_point", type: "int" })
-  public crashPoint!: number;
+  @Column({ name: "crash_point", type: "int", nullable: true })
+  public crashPoint!: number | null;
+
+  @Column({ name: "crash_at", type: "timestamptz", nullable: true })
+  public crashAt!: Date | null;
 
   @Column({ name: "betting_ends_at", type: "timestamptz", nullable: true })
   public bettingEndsAt!: Date | null;
@@ -22,6 +25,9 @@ export class GameRoundOrmEntity {
 
   @Column({ name: "crashed_at", type: "timestamptz", nullable: true })
   public crashedAt!: Date | null;
+
+  @Column({ name: "finished_at", type: "timestamptz", nullable: true })
+  public finishedAt!: Date | null;
 
   @Column({ name: "created_at", type: "timestamptz" })
   public createdAt!: Date;

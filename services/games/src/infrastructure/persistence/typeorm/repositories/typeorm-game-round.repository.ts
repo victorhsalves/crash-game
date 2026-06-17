@@ -8,8 +8,7 @@ import { GameRoundMapper } from "../mappers/game-round.mapper";
 
 @Injectable()
 export class TypeOrmGameRoundRepository implements GameRoundRepository {
-  private static readonly ActiveStatuses: readonly RoundStatus[] = [
-    RoundStatus.Waiting,
+  private static readonly CurrentStatuses: readonly RoundStatus[] = [
     RoundStatus.Betting,
     RoundStatus.Running,
     RoundStatus.Crashed,
@@ -30,8 +29,18 @@ export class TypeOrmGameRoundRepository implements GameRoundRepository {
   public async findCurrent(): Promise<GameRound | null> {
     const entity = await this.repository
       .createQueryBuilder("round")
-      .where("round.status IN (:...statuses)", { statuses: [...TypeOrmGameRoundRepository.ActiveStatuses] })
+      .where("round.status IN (:...statuses)", { statuses: [...TypeOrmGameRoundRepository.CurrentStatuses] })
       .orderBy("round.createdAt", "DESC")
+      .getOne();
+
+    return entity !== null ? GameRoundMapper.toDomain(entity) : null;
+  }
+
+  public async findNextWaiting(): Promise<GameRound | null> {
+    const entity = await this.repository
+      .createQueryBuilder("round")
+      .where("round.status = :status", { status: RoundStatus.Waiting })
+      .orderBy("round.createdAt", "ASC")
       .getOne();
 
     return entity !== null ? GameRoundMapper.toDomain(entity) : null;

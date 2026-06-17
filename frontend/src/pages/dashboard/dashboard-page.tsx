@@ -21,6 +21,7 @@ const statusBadgeClass: Record<GameRoundStatus, string> = {
   BETTING: "bg-primary/20 text-primary",
   RUNNING: "bg-primary/30 text-primary",
   CRASHED: "bg-danger/20 text-danger",
+  FINISHED: "bg-muted/20 text-muted",
 };
 
 function StatusBadge({ status }: { status: GameRoundStatus }) {
