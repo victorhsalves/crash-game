@@ -24,7 +24,7 @@ function StatusBadge({ valid, label }: { valid: boolean; label: string }) {
 
 function DataRow({ label, value }: { label: string; value: string | number | null }) {
   return (
-    <div className="grid grid-cols-[140px_1fr] gap-2 text-xs">
+    <div className="flex flex-col gap-0.5 text-xs sm:grid sm:grid-cols-[140px_1fr] sm:gap-2">
       <span className="text-muted">{label}</span>
       <span className="break-all font-mono">{value ?? "-"}</span>
     </div>

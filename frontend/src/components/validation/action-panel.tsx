@@ -39,20 +39,32 @@ export function ActionPanel({
     !isCashingOut;
 
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-3 border-t border-border bg-surface px-4 py-3">
+    <div className="safe-area-bottom flex shrink-0 flex-col gap-3 border-t border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-4">
       <BetAmountControl
+        className="w-full justify-center sm:w-auto"
         amount={amount}
         disabled={!canPlaceBet}
         onIncrement={onIncrement}
         onDecrement={onDecrement}
         onChange={onAmountChange}
       />
-      <Button variant="primary" disabled={!canPlaceBet} onClick={onPlaceBet}>
-        {isPending ? "Apostando..." : "Apostar"}
-      </Button>
-      <Button disabled={!canCashout} onClick={onCashout}>
-        {isCashingOut ? "Sacando..." : "Cashout"}
-      </Button>
+      <div className="flex w-full gap-2 sm:w-auto">
+        <Button
+          variant="primary"
+          className="min-h-11 flex-1 sm:min-h-0 sm:flex-none"
+          disabled={!canPlaceBet}
+          onClick={onPlaceBet}
+        >
+          {isPending ? "Apostando..." : "Apostar"}
+        </Button>
+        <Button
+          className="min-h-11 flex-1 sm:min-h-0 sm:flex-none"
+          disabled={!canCashout}
+          onClick={onCashout}
+        >
+          {isCashingOut ? "Sacando..." : "Cashout"}
+        </Button>
+      </div>
     </div>
   );
 }

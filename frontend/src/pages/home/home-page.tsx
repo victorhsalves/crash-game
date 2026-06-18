@@ -32,9 +32,9 @@ export function HomePage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-md flex-col gap-6 py-24">
+    <div className="mx-auto flex max-w-md flex-col gap-6 py-12 sm:py-24">
       <div className="text-center">
-        <h2 className="text-3xl font-bold text-foreground">Bem-vindo ao Crash Game</h2>
+        <h2 className="text-2xl font-bold text-foreground sm:text-3xl">Bem-vindo ao Crash Game</h2>
         <p className="mt-2 text-muted">Faca login para acessar sua conta e carteira.</p>
       </div>
 

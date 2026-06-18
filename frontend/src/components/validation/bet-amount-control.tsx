@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 interface BetAmountControlProps {
   amount: number;
   disabled?: boolean;
+  className?: string;
   onIncrement: () => void;
   onDecrement: () => void;
   onChange: (value: number) => void;
@@ -11,12 +12,13 @@ interface BetAmountControlProps {
 export function BetAmountControl({
   amount,
   disabled = false,
+  className = "",
   onIncrement,
   onDecrement,
   onChange,
 }: BetAmountControlProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className={`flex items-center gap-2 ${className}`}>
       <Button variant="secondary" disabled={disabled} onClick={onDecrement} aria-label="Diminuir valor">
         -
       </Button>

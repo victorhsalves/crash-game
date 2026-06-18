@@ -16,7 +16,7 @@ export function MultiplierDisplay({ value, status }: MultiplierDisplayProps) {
   const colorClass = status ? (statusColorClasses[status] ?? "text-foreground") : "text-foreground";
 
   return (
-    <span className={`font-mono text-6xl font-bold tracking-tight ${colorClass}`}>
+    <span className={`font-mono text-[clamp(2rem,10vw,3.75rem)] font-bold tracking-tight ${colorClass}`}>
       {formatMultiplier(value)}
     </span>
   );

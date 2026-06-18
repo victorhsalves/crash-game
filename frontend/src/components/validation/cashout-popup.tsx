@@ -12,9 +12,9 @@ export function CashoutPopup({ isOpen, isLoading, multiplier }: CashoutPopupProp
   }
 
   return (
-    <div className="flex flex-col items-center justify-center animate-popup-in rounded-xl border border-primary bg-surface/90 px-5 py-3 shadow-lg backdrop-blur-sm">
+    <div className="animate-popup-in flex min-w-[7.5rem] flex-col items-center rounded-xl border-2 border-primary bg-surface/90 px-4 py-2 shadow-lg backdrop-blur-sm sm:min-w-[8.5rem] sm:px-6 sm:py-3">
       <span className="text-sm text-muted">Cashout</span>
-      <div className="font-mono text-2xl font-bold text-primary">
+      <div className="font-mono text-lg font-semibold text-primary sm:text-xl">
         {isLoading || multiplier === null ? "Sacando..." : formatMultiplier(multiplier)}
       </div>
     </div>

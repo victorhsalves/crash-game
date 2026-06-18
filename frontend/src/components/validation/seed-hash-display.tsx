@@ -37,7 +37,7 @@ export function SeedHashDisplay({ serverSeedHash, roundStatus }: SeedHashDisplay
   }
 
   return (
-    <div className="pointer-events-auto absolute top-3 left-3 z-10 flex items-center gap-1 py-0.5">
+    <div className="pointer-events-auto absolute top-2 left-2 z-10 flex items-center gap-1 py-0.5 sm:top-3 sm:left-3">
       <span className="font-mono text-xs text-muted" title={serverSeedHash}>
         {truncateHash(serverSeedHash)}
       </span>

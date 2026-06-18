@@ -43,24 +43,25 @@ export function CrashGameStage({
         <MultiplierDisplay value={multiplier} status={roundStatus} />
       </div>
 
-      {isCashoutPopupOpen ? (
-        <div className="pointer-events-none absolute inset-x-0 top-[5%] z-10 flex justify-center px-4">
-          <CashoutPopup
-            isOpen={isCashoutPopupOpen}
-            isLoading={isCashingOut && cashoutMultiplier === null}
-            multiplier={cashoutMultiplier}
-          />
-        </div>
-      ) : null}
-
-      {showBetStake ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 z-10 flex justify-center px-4">
-          <BetStakeDisplay
-            amountCents={betAmountCents}
-            roundStatus={roundStatus}
-            betStatus={betStatus}
-            payout={betPayout}
-          />
+      {showBetStake || isCashoutPopupOpen ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4 sm:bottom-6">
+          <div className="flex flex-row flex-wrap items-stretch justify-center gap-2 sm:gap-3">
+            {showBetStake ? (
+              <BetStakeDisplay
+                amountCents={betAmountCents}
+                roundStatus={roundStatus}
+                betStatus={betStatus}
+                payout={betPayout}
+              />
+            ) : null}
+            {isCashoutPopupOpen ? (
+              <CashoutPopup
+                isOpen={isCashoutPopupOpen}
+                isLoading={isCashingOut && cashoutMultiplier === null}
+                multiplier={cashoutMultiplier}
+              />
+            ) : null}
+          </div>
         </div>
       ) : null}
     </div>

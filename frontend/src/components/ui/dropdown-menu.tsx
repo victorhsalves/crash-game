@@ -47,7 +47,7 @@ export function DropdownMenu({
     <div ref={containerRef} className="relative">
       <button
         type="button"
-        className="inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-surface-hover"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-surface-hover sm:min-h-0 sm:min-w-0"
         aria-expanded={isOpen}
         aria-haspopup="menu"
         onClick={() => onOpenChange(!isOpen)}

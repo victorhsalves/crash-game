@@ -40,7 +40,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
-        className="relative flex max-h-[80vh] w-full max-w-2xl flex-col rounded-lg border border-border bg-surface shadow-lg"
+        className="relative mx-2 flex max-h-[85dvh] w-full max-w-2xl flex-col rounded-lg border border-border bg-surface shadow-lg sm:mx-0"
       >
         <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
           <h2 id="modal-title" className="text-sm font-medium">

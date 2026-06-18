@@ -26,10 +26,11 @@ export function PlayerMenu() {
     <DropdownMenu
       isOpen={isOpen}
       onOpenChange={setIsOpen}
+      align="right"
       trigger={
         <>
           <UserAvatarIcon />
-          <span className="font-medium text-foreground">{username}</span>
+          <span className="hidden font-medium text-foreground sm:inline">{username}</span>
           <span className="text-xs text-muted" aria-hidden="true">
             ▾
           </span>

@@ -26,7 +26,7 @@ function historyColor(crashPoint: string): string {
 
 export function RoundHistoryStrip({ items, isLoading, onSelectRound }: RoundHistoryStripProps) {
   return (
-    <div className="shrink-0 border-b border-border px-4 py-2">
+    <div className="shrink-0 border-b border-border px-3 py-2 sm:px-4">
       <div className="mb-2 text-xs text-muted">Historico de rodadas</div>
       <div className="scrollbar-subtle flex gap-2 overflow-x-auto pb-1">
         {isLoading ? <span className="text-xs text-muted">Carregando...</span> : null}
@@ -37,7 +37,7 @@ export function RoundHistoryStrip({ items, isLoading, onSelectRound }: RoundHist
           <button
             key={item.id}
             type="button"
-            className={`shrink-0 rounded px-2 py-1 font-mono text-xs ${historyColor(item.crashPoint)}`}
+            className={`min-h-8 shrink-0 rounded px-2 py-1 font-mono text-xs ${historyColor(item.crashPoint)}`}
             onClick={() => onSelectRound(item.id)}
             title={`Verificar rodada ${item.id}`}
           >

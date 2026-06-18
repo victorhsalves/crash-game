@@ -78,10 +78,10 @@ export function BetStakeDisplay({
 
   return (
     <div
-      className={`animate-slide-up flex flex-col items-center rounded-xl border-2 bg-surface/90 px-6 py-3 shadow-lg backdrop-blur-sm transition-colors duration-500 ${borderClasses[variant]}`}
+      className={`animate-slide-up flex min-w-[7.5rem] flex-col items-center rounded-xl border-2 bg-surface/90 px-4 py-2 shadow-lg backdrop-blur-sm transition-colors duration-500 sm:min-w-[8.5rem] sm:px-6 sm:py-3 ${borderClasses[variant]}`}
     >
       <span className="text-sm text-muted">{label}</span>
-      <span className="font-mono text-xl font-semibold">{formatCurrencyFromReais(displayValue)}</span>
+      <span className="font-mono text-lg font-semibold sm:text-xl">{formatCurrencyFromReais(displayValue)}</span>
     </div>
   );
 }

@@ -78,3 +78,7 @@ body {
   background-color: #4b5563;
   border-radius: 9999px;
 }
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
