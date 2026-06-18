@@ -27,7 +27,8 @@ export function CrashGamePage() {
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
-  const { displayValue, handleMultiplierEvent, syncFromRound } = useCrashMultiplier();
+  const { displayValue, curvePoints, chartPhase, handleMultiplierEvent, syncFromRound } =
+    useCrashMultiplier();
   const {
     cashout,
     isCashingOut,
@@ -131,6 +132,8 @@ export function CrashGamePage() {
       <CrashGameStage
         multiplier={displayValue}
         roundStatus={roundState.status}
+        curvePoints={curvePoints}
+        chartPhase={chartPhase}
         isCashoutPopupOpen={isPopupOpen}
         isCashingOut={isCashingOut}
         cashoutMultiplier={cashoutMultiplier}

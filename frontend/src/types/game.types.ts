@@ -51,6 +51,13 @@ export interface RoundState {
 
 export type BetStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "CASHED_OUT" | "LOST";
 
+export type CrashChartPhase = "idle" | "running" | "crashed";
+
+export interface CrashCurvePoint {
+  elapsedSeconds: number;
+  multiplier: number;
+}
+
 export interface BetState {
   betId: string | null;
   status: BetStatus | null;
