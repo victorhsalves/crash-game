@@ -10,6 +10,9 @@ export class CurrentRoundResponseDto {
   status!: RoundStatus;
   currentMultiplier!: string | null;
   crashPoint!: string | null;
+  serverSeedHash!: string | null;
+  clientSeed!: string | null;
+  nonce!: number | null;
   bettingEndsAt!: string | null;
   startedAt!: string | null;
   crashedAt!: string | null;
@@ -18,6 +21,8 @@ export class CurrentRoundResponseDto {
 
   public static fromDomain(gameRound: GameRound): CurrentRoundResponseDto {
     const dto = new CurrentRoundResponseDto();
+    const exposesFairness =
+      gameRound.status === RoundStatus.Betting || gameRound.status === RoundStatus.Running;
 
     dto.id = gameRound.id;
     dto.status = gameRound.status;
@@ -29,6 +34,9 @@ export class CurrentRoundResponseDto {
       gameRound.status === RoundStatus.Crashed || gameRound.status === RoundStatus.Finished
         ? formatMultiplierValue(gameRound.crashPoint!.value)
         : null;
+    dto.serverSeedHash = exposesFairness ? gameRound.serverSeedHash : null;
+    dto.clientSeed = exposesFairness ? gameRound.clientSeed : null;
+    dto.nonce = exposesFairness ? gameRound.nonce : null;
     dto.bettingEndsAt = gameRound.bettingEndsAt?.toISOString() ?? null;
     dto.startedAt = gameRound.startedAt?.toISOString() ?? null;
     dto.crashedAt = gameRound.crashedAt?.toISOString() ?? null;

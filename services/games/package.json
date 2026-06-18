@@ -17,6 +17,7 @@
     "@crash/auth": "workspace:*",
     "@crash/messaging": "workspace:*",
     "@crash/money": "workspace:*",
+    "@crash/provably-fair": "workspace:*",
     "@crash/websocket": "workspace:*",
     "@nestjs/common": "^11.1.17",
     "@nestjs/core": "^11.1.17",

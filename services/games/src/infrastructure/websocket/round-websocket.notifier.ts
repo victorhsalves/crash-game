@@ -21,6 +21,9 @@ export class RoundWebSocketNotifier {
       roundId: round.id,
       status: "BETTING",
       bettingEndsAt: round.bettingEndsAt!.toISOString(),
+      serverSeedHash: round.serverSeedHash!,
+      clientSeed: round.clientSeed!,
+      nonce: round.nonce!,
     };
 
     await this.eventBroadcaster.broadcast(WebSocketRoundEvents.BettingOpened, payload);
@@ -42,6 +45,10 @@ export class RoundWebSocketNotifier {
       roundId: round.id,
       crashPoint: round.crashPoint!.value,
       crashedAt: round.crashedAt!.toISOString(),
+      serverSeed: round.serverSeed!,
+      serverSeedHash: round.serverSeedHash!,
+      clientSeed: round.clientSeed!,
+      nonce: round.nonce!,
     };
 
     await this.eventBroadcaster.broadcast(WebSocketRoundEvents.Crashed, payload);

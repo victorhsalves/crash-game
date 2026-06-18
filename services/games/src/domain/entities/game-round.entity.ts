@@ -19,8 +19,21 @@ export interface GameRoundProps {
   readonly crashedAt?: Date | null;
   readonly finishedAt?: Date | null;
   readonly settledAt?: Date | null;
+  readonly serverSeed?: string | null;
+  readonly serverSeedHash?: string | null;
+  readonly clientSeed?: string | null;
+  readonly nonce?: number | null;
+  readonly chainIndex?: number | null;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
+}
+
+export interface RoundFairnessData {
+  readonly serverSeed: string;
+  readonly serverSeedHash: string;
+  readonly clientSeed: string;
+  readonly nonce: number;
+  readonly chainIndex: number;
 }
 
 export class GameRound extends AggregateRoot {
@@ -34,6 +47,11 @@ export class GameRound extends AggregateRoot {
   private roundCrashedAt: Date | null;
   private roundFinishedAt: Date | null;
   private roundSettledAt: Date | null;
+  private roundServerSeed: string | null;
+  private roundServerSeedHash: string | null;
+  private roundClientSeed: string | null;
+  private roundNonce: number | null;
+  private roundChainIndex: number | null;
   private readonly roundCreatedAt: Date;
   private roundUpdatedAt: Date;
 
@@ -44,6 +62,11 @@ export class GameRound extends AggregateRoot {
       crashPoint: null,
       crashAt: null,
       currentMultiplier: Multiplier.minimum(),
+      serverSeed: null,
+      serverSeedHash: null,
+      clientSeed: null,
+      nonce: null,
+      chainIndex: null,
     });
   }
 
@@ -64,6 +87,11 @@ export class GameRound extends AggregateRoot {
     this.roundCrashedAt = props.crashedAt ? new Date(props.crashedAt.getTime()) : null;
     this.roundFinishedAt = props.finishedAt ? new Date(props.finishedAt.getTime()) : null;
     this.roundSettledAt = props.settledAt ? new Date(props.settledAt.getTime()) : null;
+    this.roundServerSeed = props.serverSeed ?? null;
+    this.roundServerSeedHash = props.serverSeedHash ?? null;
+    this.roundClientSeed = props.clientSeed ?? null;
+    this.roundNonce = props.nonce ?? null;
+    this.roundChainIndex = props.chainIndex ?? null;
     this.roundCreatedAt = props.createdAt ? new Date(props.createdAt.getTime()) : new Date();
     this.roundUpdatedAt = props.updatedAt ? new Date(props.updatedAt.getTime()) : new Date();
   }
@@ -108,6 +136,26 @@ export class GameRound extends AggregateRoot {
     return this.roundSettledAt ? new Date(this.roundSettledAt.getTime()) : null;
   }
 
+  public get serverSeed(): string | null {
+    return this.roundServerSeed;
+  }
+
+  public get serverSeedHash(): string | null {
+    return this.roundServerSeedHash;
+  }
+
+  public get clientSeed(): string | null {
+    return this.roundClientSeed;
+  }
+
+  public get nonce(): number | null {
+    return this.roundNonce;
+  }
+
+  public get chainIndex(): number | null {
+    return this.roundChainIndex;
+  }
+
   public get createdAt(): Date {
     return new Date(this.roundCreatedAt.getTime());
   }
@@ -126,9 +174,31 @@ export class GameRound extends AggregateRoot {
     this.roundUpdatedAt = new Date();
   }
 
+  public assignFairnessData(data: RoundFairnessData): void {
+    if (this.roundStatus !== RoundStatus.Betting) {
+      throw new DomainError("Fairness data can only be assigned while betting is open.");
+    }
+
+    this.roundServerSeed = data.serverSeed;
+    this.roundServerSeedHash = data.serverSeedHash;
+    this.roundClientSeed = data.clientSeed;
+    this.roundNonce = data.nonce;
+    this.roundChainIndex = data.chainIndex;
+    this.roundUpdatedAt = new Date();
+  }
+
   public start(crashPoint: CrashPoint, curve: CrashCurve): void {
     if (this.roundStatus !== RoundStatus.Betting) {
       throw new DomainError("Only a betting round can be started.");
+    }
+
+    if (
+      this.roundServerSeed === null ||
+      this.roundServerSeedHash === null ||
+      this.roundClientSeed === null ||
+      this.roundNonce === null
+    ) {
+      throw new DomainError("Fairness data must be assigned before starting the round.");
     }
 
     const startedAt = new Date();

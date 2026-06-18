@@ -29,10 +29,15 @@ function parsePhaseEndsAt(status: GameRoundStatus, round: CurrentGameRound): Dat
 }
 
 function stateFromCurrentRound(round: CurrentGameRound): RoundState {
+  const exposesFairness = round.status === "BETTING" || round.status === "RUNNING";
+
   return {
     roundId: round.id,
     status: round.status,
     phaseEndsAt: parsePhaseEndsAt(round.status, round),
+    serverSeedHash: exposesFairness ? round.serverSeedHash : null,
+    clientSeed: exposesFairness ? round.clientSeed : null,
+    nonce: exposesFairness ? round.nonce : null,
   };
 }
 
@@ -41,6 +46,9 @@ export function useRoundState() {
     roundId: null,
     status: null,
     phaseEndsAt: null,
+    serverSeedHash: null,
+    clientSeed: null,
+    nonce: null,
   });
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
 
@@ -49,7 +57,7 @@ export function useRoundState() {
       const round = await gameApi.getCurrentRound();
       setRoundState(stateFromCurrentRound(round));
     } catch {
-      setRoundState({ roundId: null, status: null, phaseEndsAt: null });
+      setRoundState({ roundId: null, status: null, phaseEndsAt: null, serverSeedHash: null, clientSeed: null, nonce: null });
     }
   }, []);
 
@@ -83,17 +91,23 @@ export function useRoundState() {
           roundId: data.roundId,
           status: "BETTING",
           phaseEndsAt: new Date(data.bettingEndsAt),
+          serverSeedHash: data.serverSeedHash,
+          clientSeed: data.clientSeed,
+          nonce: data.nonce,
         });
         return;
       }
 
       if (event === WebSocketEvents.RoundRunning) {
         const data = payload as RoundRunningWebSocketPayload;
-        setRoundState({
+        setRoundState((current) => ({
           roundId: data.roundId,
           status: "RUNNING",
           phaseEndsAt: null,
-        });
+          serverSeedHash: current.serverSeedHash,
+          clientSeed: current.clientSeed,
+          nonce: current.nonce,
+        }));
         return;
       }
 
@@ -103,6 +117,9 @@ export function useRoundState() {
           roundId: data.roundId,
           status: "CRASHED",
           phaseEndsAt: crashedPhaseEndsAt(data.crashedAt),
+          serverSeedHash: null,
+          clientSeed: null,
+          nonce: null,
         });
         return;
       }
@@ -113,6 +130,9 @@ export function useRoundState() {
           roundId: data.roundId,
           status: "FINISHED",
           phaseEndsAt: null,
+          serverSeedHash: null,
+          clientSeed: null,
+          nonce: null,
         });
         void syncFromApi();
       }

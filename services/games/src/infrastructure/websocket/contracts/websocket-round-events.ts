@@ -9,6 +9,9 @@ export interface RoundBettingOpenedWebSocketPayload {
   roundId: string;
   status: "BETTING";
   bettingEndsAt: string;
+  serverSeedHash: string;
+  clientSeed: string;
+  nonce: number;
 }
 
 export interface RoundRunningWebSocketPayload {
@@ -22,6 +25,10 @@ export interface RoundCrashedWebSocketPayload {
   roundId: string;
   crashPoint: number;
   crashedAt: string;
+  serverSeed: string;
+  serverSeedHash: string;
+  clientSeed: string;
+  nonce: number;
 }
 
 export interface RoundFinishedWebSocketPayload {

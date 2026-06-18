@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { DataSource, Repository } from "typeorm";
 import type { GameRound } from "../../../../domain/entities/game-round.entity";
 import { RoundStatus } from "../../../../domain/enums/round-status.enum";
-import type { GameRoundRepository } from "../../../../domain/repositories/game-round.repository";
+import type { GameRoundRepository, RoundHistoryItem } from "../../../../domain/repositories/game-round.repository";
 import { GameRoundOrmEntity } from "../entities/game-round.orm-entity";
 import { GameRoundMapper } from "../mappers/game-round.mapper";
 
@@ -57,6 +57,28 @@ export class TypeOrmGameRoundRepository implements GameRoundRepository {
       .getOne();
 
     return entity !== null ? GameRoundMapper.toDomain(entity) : null;
+  }
+
+  public async findHistory(limit: number, offset: number): Promise<RoundHistoryItem[]> {
+    const entities = await this.repository
+      .createQueryBuilder("round")
+      .where("round.status IN (:...statuses)", {
+        statuses: [RoundStatus.Crashed, RoundStatus.Finished],
+      })
+      .andWhere("round.crashPoint IS NOT NULL")
+      .andWhere("round.crashedAt IS NOT NULL")
+      .andWhere("round.serverSeedHash IS NOT NULL")
+      .orderBy("round.crashedAt", "DESC")
+      .offset(offset)
+      .limit(limit)
+      .getMany();
+
+    return entities.map((entity) => ({
+      id: entity.id,
+      crashPointBasisPoints: entity.crashPoint!,
+      crashedAt: entity.crashedAt!,
+      serverSeedHash: entity.serverSeedHash!,
+    }));
   }
 
   public async save(round: GameRound): Promise<void> {

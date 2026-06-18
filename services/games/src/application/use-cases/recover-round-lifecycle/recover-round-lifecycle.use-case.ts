@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { RoundStatus } from "../../../domain/enums/round-status.enum";
 import type { GameRoundRepository } from "../../../domain/repositories/game-round.repository";
+import { HashChainSeedProvider } from "../../../infrastructure/crash/hash-chain-seed-provider";
 import { GAME_ROUND_REPOSITORY } from "../../common/tokens";
 import { CrashRoundUseCase } from "../crash-round/crash-round.use-case";
 import { CreateGameRoundUseCase } from "../create-game-round/create-game-round.use-case";
@@ -29,6 +30,7 @@ export class RecoverRoundLifecycleUseCase {
     private readonly finishRoundUseCase: FinishRoundUseCase,
     private readonly ensureNextRoundWaitingUseCase: EnsureNextRoundWaitingUseCase,
     private readonly settleRoundBetsUseCase: SettleRoundBetsUseCase,
+    private readonly hashChainSeedProvider: HashChainSeedProvider,
   ) {}
 
   public async execute(input: RecoverRoundLifecycleInput): Promise<RecoverRoundLifecycleResult> {
@@ -53,6 +55,12 @@ export class RecoverRoundLifecycleUseCase {
 
     if (current !== null) {
       if (current.status === RoundStatus.Betting) {
+        if (current.serverSeedHash === null) {
+          const fairnessData = await this.hashChainSeedProvider.assignNextSeed();
+          current.assignFairnessData(fairnessData);
+          await this.gameRoundRepository.save(current);
+        }
+
         const bettingEndsAt = current.bettingEndsAt!.getTime();
 
         if (now >= bettingEndsAt) {

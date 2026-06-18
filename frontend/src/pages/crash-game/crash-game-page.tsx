@@ -3,8 +3,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
 import { CrashGameStage } from "@/components/validation/crash-game-stage";
 import { EventLogModal } from "@/components/validation/event-log-modal";
-import { RoundStatusPanel } from "@/components/validation/round-status-panel";
-import { WalletBar } from "@/components/validation/wallet-bar";
+import { ProvablyFairModal } from "@/components/validation/provably-fair-modal";
+import { RoundHistoryStrip } from "@/components/validation/round-history-strip";
+import { CrashGameTopBar } from "@/components/validation/crash-game-top-bar";
 import { useAuth } from "@/hooks/use-auth";
 import { useBetAmount } from "@/hooks/use-bet-amount";
 import { useBetState } from "@/hooks/use-bet-state";
@@ -12,7 +13,9 @@ import { useCashout } from "@/hooks/use-cashout";
 import { useCrashMultiplier } from "@/hooks/use-crash-multiplier";
 import { useEventLog } from "@/hooks/use-event-log";
 import { usePlaceBet } from "@/hooks/use-place-bet";
+import { useRoundHistory } from "@/hooks/use-round-history";
 import { useRoundState } from "@/hooks/use-round-state";
+import { useRoundVerification } from "@/hooks/use-round-verification";
 import { useValidationWebSocket } from "@/hooks/use-validation-websocket";
 import { gameApi } from "@/services/game/game.api";
 import { WebSocketEvents } from "@/services/websocket/events";
@@ -23,10 +26,14 @@ export function CrashGamePage() {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
   const [isEventLogOpen, setIsEventLogOpen] = useState(false);
+  const [verificationRoundId, setVerificationRoundId] = useState<string | null>(null);
+  const [isVerificationOpen, setIsVerificationOpen] = useState(false);
   const { entries, append, clear, scrollRef } = useEventLog();
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
+  const { items: historyItems, isLoading: isHistoryLoading, refresh: refreshHistory } = useRoundHistory();
+  const { state: verificationState } = useRoundVerification(verificationRoundId, isVerificationOpen);
   const { displayValue, curvePoints, chartPhase, handleMultiplierEvent, syncFromRound } =
     useCrashMultiplier();
   const {
@@ -72,6 +79,7 @@ export function CrashGamePage() {
 
       if (event === WebSocketEvents.RoundCrashed) {
         refreshWallet();
+        refreshHistory();
       }
 
       if (event === WebSocketEvents.BetUpdated && typeof payload === "object" && payload !== null) {
@@ -98,6 +106,7 @@ export function CrashGamePage() {
       handleRoundEvent,
       handleRoundEventForPopup,
       refreshWallet,
+      refreshHistory,
       resetBetState,
       syncFromRound,
     ],
@@ -120,18 +129,33 @@ export function CrashGamePage() {
     setIsEventLogOpen(false);
   }, []);
 
+  const handleOpenVerification = useCallback((roundId: string) => {
+    setVerificationRoundId(roundId);
+    setIsVerificationOpen(true);
+  }, []);
+
+  const handleCloseVerification = useCallback(() => {
+    setIsVerificationOpen(false);
+    setVerificationRoundId(null);
+  }, []);
+
   return (
     <div className="-mx-6 -my-8 flex h-[calc(100vh-113px)] flex-col">
-      <WalletBar />
-      <RoundStatusPanel
+      <CrashGameTopBar
         roundState={roundState}
         remainingSeconds={remainingSeconds}
         isEventLogOpen={isEventLogOpen}
         onToggleEventLog={handleToggleEventLog}
       />
+      <RoundHistoryStrip
+        items={historyItems}
+        isLoading={isHistoryLoading}
+        onSelectRound={handleOpenVerification}
+      />
       <CrashGameStage
         multiplier={displayValue}
         roundStatus={roundState.status}
+        serverSeedHash={roundState.serverSeedHash}
         curvePoints={curvePoints}
         chartPhase={chartPhase}
         isCashoutPopupOpen={isPopupOpen}
@@ -160,6 +184,11 @@ export function CrashGamePage() {
         entries={entries}
         scrollRef={scrollRef}
         onClear={clear}
+      />
+      <ProvablyFairModal
+        open={isVerificationOpen}
+        onClose={handleCloseVerification}
+        verification={verificationState}
       />
     </div>
   );

@@ -2,11 +2,13 @@ import { CashoutPopup } from "@/components/validation/cashout-popup";
 import { BetStakeDisplay } from "@/components/validation/bet-stake-display";
 import { CrashLineChart } from "@/components/validation/crash-line-chart";
 import { MultiplierDisplay } from "@/components/validation/multiplier-display";
+import { SeedHashDisplay } from "@/components/validation/seed-hash-display";
 import type { BetStatus, CrashChartPhase, CrashCurvePoint, GameRoundStatus } from "@/types/game.types";
 
 interface CrashGameStageProps {
   multiplier: number;
   roundStatus: GameRoundStatus | null;
+  serverSeedHash: string | null;
   curvePoints: CrashCurvePoint[];
   chartPhase: CrashChartPhase;
   isCashoutPopupOpen: boolean;
@@ -20,6 +22,7 @@ interface CrashGameStageProps {
 export function CrashGameStage({
   multiplier,
   roundStatus,
+  serverSeedHash,
   curvePoints,
   chartPhase,
   isCashoutPopupOpen,
@@ -34,6 +37,7 @@ export function CrashGameStage({
   return (
     <div className="relative min-h-0 flex-1 border-b border-border">
       <CrashLineChart points={curvePoints} phase={chartPhase} roundStatus={roundStatus} />
+      <SeedHashDisplay serverSeedHash={serverSeedHash} roundStatus={roundStatus} />
 
       <div className="relative z-[2] flex h-full items-center justify-center">
         <MultiplierDisplay value={multiplier} status={roundStatus} />

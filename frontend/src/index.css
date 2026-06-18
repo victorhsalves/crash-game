@@ -59,3 +59,22 @@ body {
 #root {
   min-height: 100vh;
 }
+
+.scrollbar-subtle {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 transparent;
+}
+
+.scrollbar-subtle::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
+  border-radius: 9999px;
+}

@@ -2,10 +2,13 @@ FROM oven/bun:1-alpine AS build
 
 WORKDIR /app
 
-COPY frontend/package.json ./
+COPY package.json bun.lock ./
+COPY packages/provably-fair ./packages/provably-fair
+COPY frontend ./frontend
+
 RUN bun install
 
-COPY frontend ./
+WORKDIR /app/frontend
 
 ARG VITE_API_BASE_URL=http://localhost:8000
 ARG VITE_OIDC_AUTHORITY=http://localhost:8080/realms/crash-game
@@ -22,7 +25,7 @@ RUN bun run build
 FROM nginx:1.27-alpine AS runtime
 
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/frontend/dist /usr/share/nginx/html
 
 EXPOSE 3000
 

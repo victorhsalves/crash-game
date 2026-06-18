@@ -17,6 +17,11 @@ export class GameRoundMapper {
       crashedAt: entity.crashedAt,
       finishedAt: entity.finishedAt,
       settledAt: entity.settledAt,
+      serverSeed: entity.serverSeed,
+      serverSeedHash: entity.serverSeedHash,
+      clientSeed: entity.clientSeed,
+      nonce: entity.nonce,
+      chainIndex: entity.chainIndex,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     });
@@ -35,6 +40,11 @@ export class GameRoundMapper {
     entity.crashedAt = round.crashedAt;
     entity.finishedAt = round.finishedAt;
     entity.settledAt = round.settledAt;
+    entity.serverSeed = round.serverSeed;
+    entity.serverSeedHash = round.serverSeedHash;
+    entity.clientSeed = round.clientSeed;
+    entity.nonce = round.nonce;
+    entity.chainIndex = round.chainIndex;
     entity.createdAt = round.createdAt;
     entity.updatedAt = round.updatedAt;
 

@@ -11,6 +11,7 @@ import { EnsureNextRoundWaitingUseCase } from "./use-cases/ensure-next-round-wai
 import { FinishRoundUseCase } from "./use-cases/finish-round/finish-round.use-case";
 import { GetBetByIdUseCase } from "./use-cases/get-bet-by-id/get-bet-by-id.use-case";
 import { GetCurrentRoundUseCase } from "./use-cases/get-current-round/get-current-round.use-case";
+import { GetRoundHistoryUseCase } from "./use-cases/get-round-history/get-round-history.use-case";
 import { OpenRoundBettingUseCase } from "./use-cases/open-round-betting/open-round-betting.use-case";
 import { PlaceBetUseCase } from "./use-cases/place-bet/place-bet.use-case";
 import { ProcessWalletDebitedUseCase } from "./use-cases/process-wallet-debited/process-wallet-debited.use-case";
@@ -19,6 +20,7 @@ import { ProcessWalletCreditedUseCase } from "./use-cases/process-wallet-credite
 import { RecoverRoundLifecycleUseCase } from "./use-cases/recover-round-lifecycle/recover-round-lifecycle.use-case";
 import { SettleRoundBetsUseCase } from "./use-cases/settle-round-bets/settle-round-bets.use-case";
 import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case";
+import { VerifyRoundUseCase } from "./use-cases/verify-round/verify-round.use-case";
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
   ],
   providers: [
     GetCurrentRoundUseCase,
+    GetRoundHistoryUseCase,
+    VerifyRoundUseCase,
     PlaceBetUseCase,
     CashoutBetUseCase,
     GetBetByIdUseCase,
@@ -47,6 +51,8 @@ import { StartRoundUseCase } from "./use-cases/start-round/start-round.use-case"
   ],
   exports: [
     GetCurrentRoundUseCase,
+    GetRoundHistoryUseCase,
+    VerifyRoundUseCase,
     PlaceBetUseCase,
     CashoutBetUseCase,
     GetBetByIdUseCase,

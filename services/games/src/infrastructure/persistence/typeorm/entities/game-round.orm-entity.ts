@@ -32,6 +32,21 @@ export class GameRoundOrmEntity {
   @Column({ name: "settled_at", type: "timestamptz", nullable: true })
   public settledAt!: Date | null;
 
+  @Column({ name: "server_seed", type: "varchar", length: 64, nullable: true })
+  public serverSeed!: string | null;
+
+  @Column({ name: "server_seed_hash", type: "varchar", length: 64, nullable: true })
+  public serverSeedHash!: string | null;
+
+  @Column({ name: "client_seed", type: "varchar", length: 64, nullable: true })
+  public clientSeed!: string | null;
+
+  @Column({ name: "nonce", type: "int", nullable: true })
+  public nonce!: number | null;
+
+  @Column({ name: "chain_index", type: "int", nullable: true })
+  public chainIndex!: number | null;
+
   @Column({ name: "created_at", type: "timestamptz" })
   public createdAt!: Date;
 

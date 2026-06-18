@@ -27,7 +27,11 @@ export class StartRoundUseCase {
       throw GameRoundNotFoundError.create();
     }
 
-    const crashPoint = this.crashPointGenerator.generate();
+    const crashPoint = this.crashPointGenerator.generate({
+      serverSeed: round.serverSeed!,
+      clientSeed: round.clientSeed!,
+      nonce: round.nonce!,
+    });
 
     round.start(crashPoint, this.crashCurve);
     await this.gameRoundRepository.save(round);

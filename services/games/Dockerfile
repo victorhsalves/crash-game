@@ -7,6 +7,7 @@ COPY packages/money ./packages/money
 COPY packages/auth ./packages/auth
 COPY packages/messaging ./packages/messaging
 COPY packages/websocket ./packages/websocket
+COPY packages/provably-fair ./packages/provably-fair
 COPY frontend ./frontend
 COPY services/games ./services/games
 

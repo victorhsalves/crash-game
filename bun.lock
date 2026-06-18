@@ -12,6 +12,7 @@
       "name": "@crash/frontend",
       "version": "0.0.1",
       "dependencies": {
+        "@crash/provably-fair": "workspace:*",
         "@tanstack/react-query": "^5.80.7",
         "@tanstack/react-router": "^1.121.16",
         "react": "^19.1.0",
@@ -70,6 +71,14 @@
         "typescript": "^5.8.3",
       },
     },
+    "packages/provably-fair": {
+      "name": "@crash/provably-fair",
+      "version": "0.0.1",
+      "devDependencies": {
+        "bun-types": "latest",
+        "typescript": "^5.8.3",
+      },
+    },
     "packages/websocket": {
       "name": "@crash/websocket",
       "version": "0.0.1",
@@ -93,6 +102,7 @@
         "@crash/auth": "workspace:*",
         "@crash/messaging": "workspace:*",
         "@crash/money": "workspace:*",
+        "@crash/provably-fair": "workspace:*",
         "@crash/websocket": "workspace:*",
         "@nestjs/common": "^11.1.17",
         "@nestjs/core": "^11.1.17",
@@ -186,6 +196,8 @@
     "@crash/messaging": ["@crash/messaging@workspace:packages/messaging"],
 
     "@crash/money": ["@crash/money@workspace:packages/money"],
+
+    "@crash/provably-fair": ["@crash/provably-fair@workspace:packages/provably-fair"],
 
     "@crash/wallets": ["@crash/wallets@workspace:services/wallets"],
 
