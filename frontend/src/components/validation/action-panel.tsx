@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { CashoutIcon } from "@/components/icons/cashout-icon";
 import { BetAmountControl } from "@/components/validation/bet-amount-control";
 import type { BetStatus, GameRoundStatus } from "@/types/game.types";
+import { formatCurrencyFromReais } from "@/utils/format-currency";
 
 interface ActionPanelProps {
   amount: number;
@@ -9,6 +11,7 @@ interface ActionPanelProps {
   isAuthenticated: boolean;
   roundStatus: GameRoundStatus | null;
   betStatus: BetStatus | null;
+  potentialPayoutReais: number | null;
   onIncrement: () => void;
   onDecrement: () => void;
   onAmountChange: (value: number) => void;
@@ -23,6 +26,7 @@ export function ActionPanel({
   isAuthenticated,
   roundStatus,
   betStatus,
+  potentialPayoutReais,
   onIncrement,
   onDecrement,
   onAmountChange,
@@ -36,7 +40,24 @@ export function ActionPanel({
     isAuthenticated &&
     roundStatus === "RUNNING" &&
     betStatus === "ACCEPTED" &&
-    !isCashingOut;
+    !isCashingOut &&
+    potentialPayoutReais !== null;
+
+  const formattedPayout =
+    potentialPayoutReais !== null ? formatCurrencyFromReais(potentialPayoutReais) : null;
+
+  const cashoutLabel = isCashingOut
+    ? "Sacando..."
+    : canCashout && formattedPayout
+      ? formattedPayout
+      : "Cash Out";
+
+  const cashoutAriaLabel =
+    isCashingOut
+      ? "Sacando aposta"
+      : canCashout && formattedPayout
+        ? `Sacar ${formattedPayout}`
+        : "Cash Out";
 
   return (
     <div className="safe-area-bottom flex shrink-0 flex-col gap-3 border-t border-border bg-surface px-3 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:px-4">
@@ -58,11 +79,14 @@ export function ActionPanel({
           {isPending ? "Apostando..." : "Apostar"}
         </Button>
         <Button
-          className="min-h-11 flex-1 sm:min-h-0 sm:flex-none"
+          className="min-h-11 min-w-0 flex-1 gap-1.5 sm:min-h-0 sm:flex-none"
           disabled={!canCashout}
           onClick={onCashout}
+          aria-label={cashoutAriaLabel}
+          title={canCashout && formattedPayout ? formattedPayout : undefined}
         >
-          {isCashingOut ? "Sacando..." : "Cashout"}
+          <CashoutIcon className="h-4 w-4 shrink-0" />
+          <span className="min-w-0 truncate text-xs tabular-nums sm:text-sm">{cashoutLabel}</span>
         </Button>
       </div>
     </div>
