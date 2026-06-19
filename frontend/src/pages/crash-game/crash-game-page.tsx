@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
 import { BetHistoryModal } from "@/components/validation/bet-history-modal";
@@ -25,6 +25,7 @@ import { gameApi } from "@/services/game/game.api";
 import { WebSocketEvents } from "@/services/websocket/events";
 import { websocketService } from "@/services/websocket/websocket.service";
 import type { BetUpdatedWebSocketPayload } from "@/types/game.types";
+import { calculatePotentialPayoutReais } from "@/utils/calculate-potential-payout";
 
 export function CrashGamePage() {
   const queryClient = useQueryClient();
@@ -37,7 +38,7 @@ export function CrashGamePage() {
   const { entries, append, clear, scrollRef } = useEventLog();
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
-  const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
+  const { roundState, remainingSeconds, justCrashed, handleRoundEvent } = useRoundState();
   const {
     bets: roundBets,
     isLoading: isRoundBetsLoading,
@@ -59,6 +60,18 @@ export function CrashGamePage() {
     handleCashoutEvent,
     handleRoundEventForPopup,
   } = useCashout({ append });
+
+  const potentialPayoutReais = useMemo(() => {
+    if (
+      roundState.status !== "RUNNING" ||
+      betState.status !== "ACCEPTED" ||
+      betState.amountCents === null
+    ) {
+      return null;
+    }
+
+    return calculatePotentialPayoutReais(betState.amountCents, displayValue);
+  }, [roundState.status, betState.status, betState.amountCents, displayValue]);
 
   const refreshWallet = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ["wallet", "me"] });
@@ -212,6 +225,7 @@ export function CrashGamePage() {
       <CrashGameStage
         multiplier={displayValue}
         roundStatus={roundState.status}
+        justCrashed={justCrashed}
         serverSeedHash={roundState.serverSeedHash}
         curvePoints={curvePoints}
         chartPhase={chartPhase}
@@ -232,6 +246,7 @@ export function CrashGamePage() {
         isAuthenticated={isAuthenticated}
         roundStatus={roundState.status}
         betStatus={betState.status}
+        potentialPayoutReais={potentialPayoutReais}
         onIncrement={increment}
         onDecrement={decrement}
         onAmountChange={setAmount}

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import { isNoActiveRoundError, useCurrentRound } from "@/hooks/use-current-round";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useLogout } from "@/hooks/use-logout";
@@ -32,6 +32,37 @@ function StatusBadge({ status }: { status: GameRoundStatus }) {
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <Skeleton className="h-10 w-20" />
+      </div>
+
+      {Array.from({ length: 3 }).map((_, index) => (
+        <section key={index} className="rounded-xl border border-border bg-surface p-6">
+          <Skeleton className="mb-4 h-6 w-32" />
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((__, rowIndex) => (
+              <div
+                key={rowIndex}
+                className="flex flex-col gap-2 border-b border-border py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 export function DashboardPage() {
   const userQuery = useCurrentUser();
   const walletQuery = useWallet();
@@ -42,7 +73,7 @@ export function DashboardPage() {
   const error = userQuery.error ?? walletQuery.error;
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return <DashboardSkeleton />;
   }
 
   if (error) {

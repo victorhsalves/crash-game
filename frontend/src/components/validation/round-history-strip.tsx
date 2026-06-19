@@ -1,4 +1,5 @@
 import type { RoundHistoryItem } from "@/types/game.types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface RoundHistoryStripProps {
   items: RoundHistoryItem[];
@@ -29,7 +30,11 @@ export function RoundHistoryStrip({ items, isLoading, onSelectRound }: RoundHist
     <div className="shrink-0 border-b border-border px-3 py-2 sm:px-4">
       <div className="mb-2 text-xs text-muted">Historico de rodadas</div>
       <div className="scrollbar-subtle flex gap-2 overflow-x-auto pb-1">
-        {isLoading ? <span className="text-xs text-muted">Carregando...</span> : null}
+        {isLoading
+          ? Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-8 w-12 shrink-0" />
+            ))
+          : null}
         {!isLoading && items.length === 0 ? (
           <span className="text-xs text-muted">Nenhuma rodada finalizada ainda.</span>
         ) : null}

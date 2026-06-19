@@ -4,6 +4,7 @@ import { formatMultiplier } from "@/utils/format-multiplier";
 interface MultiplierDisplayProps {
   value: number;
   status: GameRoundStatus | null;
+  justCrashed?: boolean;
 }
 
 const statusColorClasses: Partial<Record<GameRoundStatus, string>> = {
@@ -12,11 +13,16 @@ const statusColorClasses: Partial<Record<GameRoundStatus, string>> = {
   CRASHED: "text-danger",
 };
 
-export function MultiplierDisplay({ value, status }: MultiplierDisplayProps) {
+export function MultiplierDisplay({ value, status, justCrashed = false }: MultiplierDisplayProps) {
   const colorClass = status ? (statusColorClasses[status] ?? "text-foreground") : "text-foreground";
+  const crashAnimClass = justCrashed ? "animate-crash-pulse" : "";
 
   return (
-    <span className={`font-mono text-[clamp(2rem,10vw,3.75rem)] font-bold tracking-tight ${colorClass}`}>
+    <span
+      aria-live="polite"
+      aria-atomic="true"
+      className={`font-mono text-[clamp(2rem,10vw,3.75rem)] font-bold tracking-tight transition-colors duration-300 ${colorClass} ${crashAnimClass}`}
+    >
       {formatMultiplier(value)}
     </span>
   );

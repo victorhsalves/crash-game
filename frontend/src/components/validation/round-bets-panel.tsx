@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ChevronLeftIcon } from "@/components/icons/chevron-left-icon";
 import { ListIcon } from "@/components/icons/list-icon";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { GameRoundStatus, RoundBetListItem } from "@/types/game.types";
 import { formatCurrencyFromReais } from "@/utils/format-currency";
 
@@ -100,7 +101,7 @@ export function RoundBetsPanel({
             {isLoading ? (
               <div className="space-y-1">
                 {Array.from({ length: 3 }).map((_, index) => (
-                  <div key={index} className="h-8 animate-pulse rounded bg-background/60" />
+                  <Skeleton key={index} className="h-8" />
                 ))}
               </div>
             ) : null}

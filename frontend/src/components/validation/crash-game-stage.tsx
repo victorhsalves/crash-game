@@ -9,6 +9,7 @@ import type { BetStatus, CrashChartPhase, CrashCurvePoint, GameRoundStatus, Roun
 interface CrashGameStageProps {
   multiplier: number;
   roundStatus: GameRoundStatus | null;
+  justCrashed?: boolean;
   serverSeedHash: string | null;
   curvePoints: CrashCurvePoint[];
   chartPhase: CrashChartPhase;
@@ -26,6 +27,7 @@ interface CrashGameStageProps {
 export function CrashGameStage({
   multiplier,
   roundStatus,
+  justCrashed = false,
   serverSeedHash,
   curvePoints,
   chartPhase,
@@ -43,6 +45,12 @@ export function CrashGameStage({
 
   return (
     <div className="relative min-h-0 flex-1 border-b border-border">
+      {justCrashed ? (
+        <div
+          className="pointer-events-none absolute inset-0 z-[3] animate-crash-flash bg-danger/10"
+          aria-hidden="true"
+        />
+      ) : null}
       <CrashLineChart points={curvePoints} phase={chartPhase} roundStatus={roundStatus} />
       <SeedHashDisplay serverSeedHash={serverSeedHash} roundStatus={roundStatus} />
       <RoundBetsPanel
@@ -54,7 +62,7 @@ export function CrashGameStage({
       />
 
       <div className="relative z-[2] flex h-full items-center justify-center">
-        <MultiplierDisplay value={multiplier} status={roundStatus} />
+        <MultiplierDisplay value={multiplier} status={roundStatus} justCrashed={justCrashed} />
       </div>
 
       {showBetStake || isCashoutPopupOpen ? (

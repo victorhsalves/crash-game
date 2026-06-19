@@ -51,6 +51,7 @@ export function useRoundState() {
     nonce: null,
   });
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [justCrashed, setJustCrashed] = useState(false);
 
   const syncFromApi = useCallback(async () => {
     try {
@@ -113,6 +114,7 @@ export function useRoundState() {
 
       if (event === WebSocketEvents.RoundCrashed) {
         const data = payload as RoundCrashedWebSocketPayload;
+        setJustCrashed(true);
         setRoundState({
           roundId: data.roundId,
           status: "CRASHED",
@@ -140,9 +142,19 @@ export function useRoundState() {
     [syncFromApi],
   );
 
+  useEffect(() => {
+    if (!justCrashed) {
+      return;
+    }
+
+    const timeout = setTimeout(() => setJustCrashed(false), 600);
+    return () => clearTimeout(timeout);
+  }, [justCrashed]);
+
   return {
     roundState,
     remainingSeconds,
+    justCrashed,
     handleRoundEvent,
     syncFromApi,
   };

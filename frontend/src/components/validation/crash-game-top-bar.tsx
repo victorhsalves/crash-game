@@ -1,6 +1,7 @@
 import { HistoryIcon } from "@/components/icons/history-icon";
 import { WalletIcon } from "@/components/icons/wallet-icon";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/use-auth";
 import { useWallet } from "@/hooks/use-wallet";
 import { resolveErrorMessage } from "@/lib/resolve-error-message";
@@ -25,6 +26,22 @@ const statusLabel: Record<GameRoundStatus, string> = {
   CRASHED: "Crash",
   FINISHED: "Finalizada",
 };
+
+const statusBadgeClass: Record<GameRoundStatus, string> = {
+  WAITING: "bg-muted/20 text-muted",
+  BETTING: "bg-primary/20 text-primary",
+  RUNNING: "bg-primary/30 text-primary",
+  CRASHED: "bg-danger/20 text-danger",
+  FINISHED: "bg-muted/20 text-muted",
+};
+
+function StatusBadge({ status }: { status: GameRoundStatus }) {
+  return (
+    <span className={`inline-flex rounded px-2 py-0.5 text-xs font-semibold ${statusBadgeClass[status]}`}>
+      {statusLabel[status]}
+    </span>
+  );
+}
 
 function formatCountdown(seconds: number | null): string {
   if (seconds === null || !Number.isFinite(seconds)) {
@@ -61,11 +78,9 @@ export function CrashGameTopBar({
     }
   }, [walletQuery.isError, walletQuery.error]);
 
-  const balanceLabel = walletQuery.isLoading
-    ? "—"
-    : walletQuery.data
-      ? formatCurrencyFromCents(walletQuery.data.balance)
-      : "—";
+  const balanceLabel = walletQuery.isLoading ? null : walletQuery.data
+    ? formatCurrencyFromCents(walletQuery.data.balance)
+    : "—";
 
   const historyButtonLabelDesktop = isBetHistoryOpen ? "Fechar historico" : "Historico";
   const eventButtonLabel = isEventLogOpen ? "Fechar" : "Eventos";
@@ -76,7 +91,11 @@ export function CrashGameTopBar({
       {isInitialized && isAuthenticated ? (
         <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-primary px-3 py-1.5 text-sm font-medium text-white sm:gap-2.5 sm:px-4 sm:py-2 sm:text-base">
           <WalletIcon className="h-5 w-5 text-primary sm:h-7 sm:w-7" />
-          <span>{balanceLabel}</span>
+          {balanceLabel === null ? (
+            <Skeleton className="h-5 w-20" />
+          ) : (
+            <span>{balanceLabel}</span>
+          )}
         </div>
       ) : (
         <div />
@@ -84,7 +103,7 @@ export function CrashGameTopBar({
 
       <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-4">
         <div className="flex items-center gap-2 sm:gap-4">
-          <span className="text-sm font-medium">{status ? statusLabel[status] : "—"}</span>
+          {status ? <StatusBadge status={status} /> : <span className="text-sm font-medium">—</span>}
           {showCountdown ? (
             <span className="font-mono text-lg font-bold sm:text-xl">
               {formatCountdown(remainingSeconds)}

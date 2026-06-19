@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { BetHistoryItem, BetStatus } from "@/types/game.types";
 import { formatCurrencyFromReais } from "@/utils/format-currency";
 
@@ -54,6 +54,22 @@ function formatResult(item: BetHistoryItem): string {
   return "—";
 }
 
+function BetHistorySkeleton() {
+  return (
+    <div className="space-y-3 py-2">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="flex gap-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function truncateRoundId(roundId: string): string {
   return roundId.slice(0, 8);
 }
@@ -74,11 +90,7 @@ export function BetHistoryModal({
     <Modal open={open} onClose={onClose} title="Historico de apostas">
       <div className="flex min-h-0 flex-col" style={{ maxHeight: "calc(80vh - 57px)" }}>
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <LoadingSpinner />
-            </div>
-          ) : null}
+          {isLoading ? <BetHistorySkeleton /> : null}
 
           {!isLoading && isError ? (
             <div className="flex flex-col items-start gap-3 py-4">
