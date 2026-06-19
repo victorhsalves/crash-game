@@ -9,6 +9,7 @@ export interface BetRepository {
   findById(id: string): Promise<Bet | null>;
   findByRoundId(roundId: string): Promise<Bet[]>;
   findByPlayerId(playerId: string): Promise<Bet[]>;
+  findByPlayerIdPaginated(playerId: string, limit: number, offset: number): Promise<Bet[]>;
   findByPlayerIdAndRoundId(playerId: string, roundId: string): Promise<Bet | null>;
   save(bet: Bet): Promise<void>;
   runInTransaction<T>(work: (scope: BetTransactionalScope) => Promise<T>): Promise<T>;

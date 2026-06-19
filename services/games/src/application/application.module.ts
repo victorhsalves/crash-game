@@ -10,6 +10,7 @@ import { CreateGameRoundUseCase } from "./use-cases/create-game-round/create-gam
 import { EnsureNextRoundWaitingUseCase } from "./use-cases/ensure-next-round-waiting/ensure-next-round-waiting.use-case";
 import { FinishRoundUseCase } from "./use-cases/finish-round/finish-round.use-case";
 import { GetBetByIdUseCase } from "./use-cases/get-bet-by-id/get-bet-by-id.use-case";
+import { GetPlayerBetHistoryUseCase } from "./use-cases/get-player-bet-history/get-player-bet-history.use-case";
 import { GetCurrentRoundUseCase } from "./use-cases/get-current-round/get-current-round.use-case";
 import { GetRoundHistoryUseCase } from "./use-cases/get-round-history/get-round-history.use-case";
 import { OpenRoundBettingUseCase } from "./use-cases/open-round-betting/open-round-betting.use-case";
@@ -37,6 +38,7 @@ import { VerifyRoundUseCase } from "./use-cases/verify-round/verify-round.use-ca
     PlaceBetUseCase,
     CashoutBetUseCase,
     GetBetByIdUseCase,
+    GetPlayerBetHistoryUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,
     ProcessWalletCreditedUseCase,
@@ -56,6 +58,7 @@ import { VerifyRoundUseCase } from "./use-cases/verify-round/verify-round.use-ca
     PlaceBetUseCase,
     CashoutBetUseCase,
     GetBetByIdUseCase,
+    GetPlayerBetHistoryUseCase,
     ProcessWalletDebitedUseCase,
     ProcessWalletDebitFailedUseCase,
     ProcessWalletCreditedUseCase,

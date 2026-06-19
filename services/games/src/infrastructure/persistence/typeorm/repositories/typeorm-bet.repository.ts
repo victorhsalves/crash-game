@@ -36,6 +36,22 @@ export class TypeOrmBetRepository implements BetRepository {
     return entities.map((entity) => BetMapper.toDomain(entity));
   }
 
+  public async findByPlayerIdPaginated(
+    playerId: string,
+    limit: number,
+    offset: number,
+  ): Promise<Bet[]> {
+    const entities = await this.repository
+      .createQueryBuilder("bet")
+      .where("bet.player_id = :playerId", { playerId })
+      .orderBy("bet.createdAt", "DESC")
+      .offset(offset)
+      .limit(limit)
+      .getMany();
+
+    return entities.map((entity) => BetMapper.toDomain(entity));
+  }
+
   public async findByPlayerIdAndRoundId(playerId: string, roundId: string): Promise<Bet | null> {
     const entity = await this.repository.findOne({ where: { playerId, roundId } });
 

@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
-import type { BetState, BetUpdatedWebSocketPayload } from "@/types/game.types";
+import { mapBetRejectedReason } from "@/lib/resolve-error-message";
+import { toast } from "@/stores/toast.store";
+import type { BetRejectedWebSocketPayload, BetState, BetUpdatedWebSocketPayload } from "@/types/game.types";
 
 const initialBetState: BetState = {
   betId: null,
@@ -36,6 +38,8 @@ export function useBetState() {
     }
 
     if (event === "bet.rejected" && typeof payload === "object" && payload !== null && "betId" in payload) {
+      const rejected = payload as BetRejectedWebSocketPayload;
+      toast.error(mapBetRejectedReason(rejected.reason));
       setBetState(initialBetState);
       return;
     }

@@ -1,6 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { ApiError } from "@/services/api/api-error";
+import { parseApiError } from "@/services/api/api-error";
 import { gameApi } from "@/services/game/game.api";
+import { resolveErrorMessage } from "@/lib/resolve-error-message";
+import { toast } from "@/stores/toast.store";
 import type { EventLogSource } from "@/types/event-log.types";
 
 import type { PlaceBetResponse } from "@/types/game.types";
@@ -15,18 +17,6 @@ interface UsePlaceBetOptions {
   onSuccess?: (response: PlaceBetResponse) => void;
 }
 
-function parseApiError(error: unknown): unknown {
-  if (!(error instanceof ApiError)) {
-    return { message: error instanceof Error ? error.message : "Unknown error" };
-  }
-
-  try {
-    return JSON.parse(error.message);
-  } catch {
-    return { statusCode: error.status, message: error.message };
-  }
-}
-
 export function usePlaceBet({ append, onSuccess }: UsePlaceBetOptions) {
   const mutation = useMutation({
     mutationFn: ({ amountCents, socketId }: PlaceBetVariables) =>
@@ -37,6 +27,7 @@ export function usePlaceBet({ append, onSuccess }: UsePlaceBetOptions) {
     },
     onError: (error) => {
       append("api", "placeBet.error", parseApiError(error));
+      toast.error(resolveErrorMessage(error));
     },
   });
 

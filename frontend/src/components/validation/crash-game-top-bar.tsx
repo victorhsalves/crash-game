@@ -1,13 +1,19 @@
+import { HistoryIcon } from "@/components/icons/history-icon";
 import { WalletIcon } from "@/components/icons/wallet-icon";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { useWallet } from "@/hooks/use-wallet";
+import { resolveErrorMessage } from "@/lib/resolve-error-message";
+import { toast } from "@/stores/toast.store";
 import type { GameRoundStatus, RoundState } from "@/types/game.types";
 import { formatCurrencyFromCents } from "@/utils/format-currency";
+import { useEffect, useRef } from "react";
 
 interface CrashGameTopBarProps {
   roundState: RoundState;
   remainingSeconds: number | null;
+  isBetHistoryOpen: boolean;
+  onToggleBetHistory: () => void;
   isEventLogOpen: boolean;
   onToggleEventLog: () => void;
 }
@@ -33,13 +39,27 @@ function formatCountdown(seconds: number | null): string {
 export function CrashGameTopBar({
   roundState,
   remainingSeconds,
+  isBetHistoryOpen,
+  onToggleBetHistory,
   isEventLogOpen,
   onToggleEventLog,
 }: CrashGameTopBarProps) {
   const { isAuthenticated, isInitialized } = useAuth();
   const walletQuery = useWallet();
+  const walletErrorShownRef = useRef(false);
   const { status } = roundState;
   const showCountdown = status === "BETTING" || status === "RUNNING" || status === "CRASHED";
+
+  useEffect(() => {
+    if (walletQuery.isError && walletQuery.error !== null && !walletErrorShownRef.current) {
+      walletErrorShownRef.current = true;
+      toast.error(resolveErrorMessage(walletQuery.error));
+    }
+
+    if (!walletQuery.isError) {
+      walletErrorShownRef.current = false;
+    }
+  }, [walletQuery.isError, walletQuery.error]);
 
   const balanceLabel = walletQuery.isLoading
     ? "—"
@@ -47,6 +67,7 @@ export function CrashGameTopBar({
       ? formatCurrencyFromCents(walletQuery.data.balance)
       : "—";
 
+  const historyButtonLabelDesktop = isBetHistoryOpen ? "Fechar historico" : "Historico";
   const eventButtonLabel = isEventLogOpen ? "Fechar" : "Eventos";
   const eventButtonLabelDesktop = isEventLogOpen ? "Fechar eventos" : "Eventos";
 
@@ -70,10 +91,20 @@ export function CrashGameTopBar({
             </span>
           ) : null}
         </div>
-        <Button variant="secondary" onClick={onToggleEventLog}>
-          <span className="sm:hidden">{eventButtonLabel}</span>
-          <span className="hidden sm:inline">{eventButtonLabelDesktop}</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={onToggleBetHistory}
+            aria-label={isBetHistoryOpen ? "Fechar historico de apostas" : "Historico de apostas"}
+          >
+            <HistoryIcon className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">{historyButtonLabelDesktop}</span>
+          </Button>
+          <Button variant="secondary" onClick={onToggleEventLog}>
+            <span className="sm:hidden">{eventButtonLabel}</span>
+            <span className="hidden sm:inline">{eventButtonLabelDesktop}</span>
+          </Button>
+        </div>
       </div>
     </div>
   );
