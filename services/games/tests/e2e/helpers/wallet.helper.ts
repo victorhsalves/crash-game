@@ -45,50 +45,33 @@ export async function createWallet(token: string): Promise<WalletDto> {
   throw new Error(`Failed to create wallet: ${response.status} ${JSON.stringify(response.data)}`);
 }
 
-export async function creditWallet(walletId: string, amountCents: number, referenceId?: string): Promise<void> {
-  const response = await apiRequest("/wallets/credit", {
+async function setWalletBalance(walletId: string, targetBalanceCents: number): Promise<void> {
+  const response = await fetch(`${E2E_CONFIG.walletsDirectUrl}/internal/wallet/set-balance`, {
     method: "POST",
-    body: {
-      walletId,
-      amountCents,
-      referenceId: referenceId ?? `e2e-credit-${crypto.randomUUID()}`,
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({ walletId, targetBalanceCents }),
   });
 
-  if (response.status !== 200) {
-    throw new Error(`Failed to credit wallet: ${response.status} ${JSON.stringify(response.data)}`);
-  }
-}
-
-export async function debitWallet(walletId: string, amountCents: number, referenceId?: string): Promise<void> {
-  const response = await apiRequest("/wallets/debit", {
-    method: "POST",
-    body: {
-      walletId,
-      amountCents,
-      referenceId: referenceId ?? `e2e-debit-${crypto.randomUUID()}`,
-    },
-  });
-
-  if (response.status !== 200) {
-    throw new Error(`Failed to debit wallet: ${response.status} ${JSON.stringify(response.data)}`);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to set wallet balance: ${response.status} ${text}`);
   }
 }
 
 export async function ensureWalletBalance(token: string, targetBalanceCents: number): Promise<WalletDto> {
-  let wallet = await createWallet(token);
-  let currentBalance = parseBalanceCents(wallet);
-  const targetBalance = BigInt(targetBalanceCents);
+  const wallet = await createWallet(token);
+  await setWalletBalance(wallet.id, targetBalanceCents);
 
-  if (currentBalance > targetBalance) {
-    await debitWallet(wallet.id, Number(currentBalance - targetBalance), `e2e-reset-debit-${crypto.randomUUID()}`);
-  } else if (currentBalance < targetBalance) {
-    await creditWallet(wallet.id, Number(targetBalance - currentBalance), `e2e-reset-credit-${crypto.randomUUID()}`);
+  const updatedWallet = await getWallet(token);
+
+  if (updatedWallet === null) {
+    throw new Error("Wallet not found after balance adjustment");
   }
 
-  wallet = (await getWallet(token))!;
-
-  return wallet;
+  return updatedWallet;
 }
 
 export async function setupWallet(token: string, targetBalanceCents: number): Promise<WalletDto> {

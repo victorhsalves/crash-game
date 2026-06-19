@@ -1,5 +1,6 @@
 export const E2E_CONFIG = {
   kongBaseUrl: process.env.E2E_KONG_URL ?? "http://localhost:8000",
+  walletsDirectUrl: process.env.E2E_WALLETS_DIRECT_URL ?? "http://localhost:4002",
   gamesWsUrl: process.env.E2E_GAMES_WS_URL ?? "http://localhost:4001",
   keycloakTokenUrl:
     process.env.E2E_KEYCLOAK_TOKEN_URL ??
