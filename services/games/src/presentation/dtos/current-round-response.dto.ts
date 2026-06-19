@@ -1,5 +1,7 @@
 import { GameRound } from "../../domain/entities/game-round.entity";
 import { RoundStatus } from "../../domain/enums/round-status.enum";
+import type { Bet } from "../../domain/entities/bet.entity";
+import { RoundBetPublicDto } from "./round-bet-public.dto";
 
 function formatMultiplierValue(value: number): string {
   return value.toFixed(2);
@@ -18,8 +20,9 @@ export class CurrentRoundResponseDto {
   crashedAt!: string | null;
   finishedAt!: string | null;
   createdAt!: string;
+  bets!: RoundBetPublicDto[];
 
-  public static fromDomain(gameRound: GameRound): CurrentRoundResponseDto {
+  public static fromDomain(gameRound: GameRound, bets: Bet[] = []): CurrentRoundResponseDto {
     const dto = new CurrentRoundResponseDto();
     const exposesFairness =
       gameRound.status === RoundStatus.Betting || gameRound.status === RoundStatus.Running;
@@ -42,6 +45,7 @@ export class CurrentRoundResponseDto {
     dto.crashedAt = gameRound.crashedAt?.toISOString() ?? null;
     dto.finishedAt = gameRound.finishedAt?.toISOString() ?? null;
     dto.createdAt = gameRound.createdAt.toISOString();
+    dto.bets = RoundBetPublicDto.fromDomainMany(bets, gameRound.status);
 
     return dto;
   }

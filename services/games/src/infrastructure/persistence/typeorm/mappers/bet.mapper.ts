@@ -9,6 +9,7 @@ export class BetMapper {
     return new Bet({
       id: entity.id,
       playerId: entity.playerId,
+      playerUsername: entity.playerUsername,
       roundId: entity.roundId,
       amount: Money.fromCents(BigInt(entity.amount)),
       status: entity.status as BetStatus,
@@ -27,6 +28,7 @@ export class BetMapper {
 
     entity.id = bet.id;
     entity.playerId = bet.playerId;
+    entity.playerUsername = bet.playerUsername;
     entity.roundId = bet.roundId;
     entity.amount = bet.amount.value.toString();
     entity.status = bet.status;

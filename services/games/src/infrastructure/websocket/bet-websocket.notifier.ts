@@ -3,13 +3,17 @@ import type { DebitFailureReason } from "@crash/messaging";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import type { CashoutBetResult } from "../../application/use-cases/cashout-bet/cashout-bet.input";
 import type { Bet } from "../../domain/entities/bet.entity";
-import type { AuthenticatedSocket } from "./authenticated-socket";
+import { RoundStatus } from "../../domain/enums/round-status.enum";
+import type { BetRepository } from "../../domain/repositories/bet.repository";
+import type { GameRoundRepository } from "../../domain/repositories/game-round.repository";
+import { BET_REPOSITORY, GAME_ROUND_REPOSITORY } from "../../application/common/tokens";
 import {
   WebSocketBetEvents,
   type BetAcceptedWebSocketPayload,
   type BetRejectedWebSocketPayload,
   type BetUpdatedWebSocketPayload,
 } from "./contracts/websocket-bet-events";
+import { RoundBetWebSocketNotifier } from "./round-bet-websocket.notifier";
 
 @Injectable()
 export class BetWebSocketNotifier {
@@ -18,6 +22,11 @@ export class BetWebSocketNotifier {
   public constructor(
     @Inject(EVENT_BROADCASTER)
     private readonly eventBroadcaster: EventBroadcaster,
+    @Inject(GAME_ROUND_REPOSITORY)
+    private readonly gameRoundRepository: GameRoundRepository,
+    @Inject(BET_REPOSITORY)
+    private readonly betRepository: BetRepository,
+    private readonly roundBetWebSocketNotifier: RoundBetWebSocketNotifier,
   ) {}
 
   public async notifyAccepted(bet: Bet): Promise<void> {
@@ -25,15 +34,19 @@ export class BetWebSocketNotifier {
 
     if (socketId === null || socketId.trim().length === 0) {
       this.logger.debug(`Bet ${bet.id} has no socketId; skipping bet.accepted emit`);
-      return;
+    } else {
+      const payload: BetAcceptedWebSocketPayload = {
+        betId: bet.id,
+        status: "ACCEPTED",
+      };
+
+      await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Accepted, payload);
     }
 
-    const payload: BetAcceptedWebSocketPayload = {
-      betId: bet.id,
-      status: "ACCEPTED",
-    };
-
-    await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Accepted, payload);
+    const roundStatus = await this.resolveRoundStatus(bet.roundId);
+    if (roundStatus !== null) {
+      await this.roundBetWebSocketNotifier.notifyAdded(bet, roundStatus);
+    }
   }
 
   public async notifyRejected(bet: Bet, reason: DebitFailureReason): Promise<void> {
@@ -53,18 +66,35 @@ export class BetWebSocketNotifier {
     await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Rejected, payload);
   }
 
-  public async notifyUpdated(socket: AuthenticatedSocket, result: CashoutBetResult): Promise<void> {
-    const payload: BetUpdatedWebSocketPayload = {
-      betId: result.betId,
-      userId: result.userId,
-      roundId: result.roundId,
-      status: "CASHED_OUT",
-      multiplier: result.multiplier,
-      payout: result.payout,
-      cashedOutAt: result.cashedOutAt.toISOString(),
-    };
+  public async notifyCashedOut(result: CashoutBetResult): Promise<void> {
+    if (result.alreadyCashedOut) {
+      return;
+    }
 
-    await this.eventBroadcaster.emitTo(socket.id, WebSocketBetEvents.Updated, payload);
+    const socketId = result.socketId;
+
+    if (socketId === null || socketId.trim().length === 0) {
+      this.logger.debug(`Bet ${result.betId} has no socketId; skipping bet.updated CASHED_OUT emit`);
+    } else {
+      const payload: BetUpdatedWebSocketPayload = {
+        betId: result.betId,
+        userId: result.userId,
+        roundId: result.roundId,
+        status: "CASHED_OUT",
+        multiplier: result.multiplier,
+        payout: result.payout,
+        cashedOutAt: result.cashedOutAt.toISOString(),
+      };
+
+      await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
+    }
+
+    const bet = await this.betRepository.findById(result.betId);
+    const roundStatus = await this.resolveRoundStatus(result.roundId);
+
+    if (bet !== null && roundStatus !== null) {
+      await this.roundBetWebSocketNotifier.notifyUpdated(bet, roundStatus);
+    }
   }
 
   public async notifyUpdatedLost(bet: Bet): Promise<void> {
@@ -72,20 +102,24 @@ export class BetWebSocketNotifier {
 
     if (socketId === null || socketId.trim().length === 0) {
       this.logger.debug(`Bet ${bet.id} has no socketId; skipping bet.updated LOST emit`);
-      return;
+    } else {
+      const payload: BetUpdatedWebSocketPayload = {
+        betId: bet.id,
+        userId: bet.playerId,
+        roundId: bet.roundId,
+        status: "LOST",
+        multiplier: null,
+        payout: null,
+        cashedOutAt: null,
+      };
+
+      await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
     }
 
-    const payload: BetUpdatedWebSocketPayload = {
-      betId: bet.id,
-      userId: bet.playerId,
-      roundId: bet.roundId,
-      status: "LOST",
-      multiplier: null,
-      payout: null,
-      cashedOutAt: null,
-    };
-
-    await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
+    const roundStatus = await this.resolveRoundStatus(bet.roundId);
+    if (roundStatus !== null) {
+      await this.roundBetWebSocketNotifier.notifyUpdated(bet, roundStatus);
+    }
   }
 
   public async notifyWalletCredited(bet: Bet): Promise<void> {
@@ -113,5 +147,10 @@ export class BetWebSocketNotifier {
     };
 
     await this.eventBroadcaster.emitTo(socketId, WebSocketBetEvents.Updated, payload);
+  }
+
+  private async resolveRoundStatus(roundId: string): Promise<RoundStatus | null> {
+    const round = await this.gameRoundRepository.findById(roundId);
+    return round?.status ?? null;
   }
 }

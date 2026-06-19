@@ -56,6 +56,7 @@ export class PlaceBetUseCase {
     const { bet } = Bet.place({
       id: crypto.randomUUID(),
       playerId: input.playerId,
+      playerUsername: input.playerUsername,
       roundId: round.id,
       amount: Money.fromCents(BigInt(input.amountCents)),
       socketId: input.socketId ?? null,

@@ -2,8 +2,9 @@ import { CashoutPopup } from "@/components/validation/cashout-popup";
 import { BetStakeDisplay } from "@/components/validation/bet-stake-display";
 import { CrashLineChart } from "@/components/validation/crash-line-chart";
 import { MultiplierDisplay } from "@/components/validation/multiplier-display";
+import { RoundBetsPanel } from "@/components/validation/round-bets-panel";
 import { SeedHashDisplay } from "@/components/validation/seed-hash-display";
-import type { BetStatus, CrashChartPhase, CrashCurvePoint, GameRoundStatus } from "@/types/game.types";
+import type { BetStatus, CrashChartPhase, CrashCurvePoint, GameRoundStatus, RoundBetListItem } from "@/types/game.types";
 
 interface CrashGameStageProps {
   multiplier: number;
@@ -17,6 +18,9 @@ interface CrashGameStageProps {
   betAmountCents: number | null;
   betStatus: BetStatus | null;
   betPayout: number | null;
+  roundBets: RoundBetListItem[];
+  roundBetsLoading: boolean;
+  currentUsername?: string;
 }
 
 export function CrashGameStage({
@@ -31,6 +35,9 @@ export function CrashGameStage({
   betAmountCents,
   betStatus,
   betPayout,
+  roundBets,
+  roundBetsLoading,
+  currentUsername,
 }: CrashGameStageProps) {
   const showBetStake = betAmountCents !== null && betStatus !== null;
 
@@ -38,6 +45,13 @@ export function CrashGameStage({
     <div className="relative min-h-0 flex-1 border-b border-border">
       <CrashLineChart points={curvePoints} phase={chartPhase} roundStatus={roundStatus} />
       <SeedHashDisplay serverSeedHash={serverSeedHash} roundStatus={roundStatus} />
+      <RoundBetsPanel
+        bets={roundBets}
+        currentUsername={currentUsername}
+        roundStatus={roundStatus}
+        serverSeedHash={serverSeedHash}
+        isLoading={roundBetsLoading}
+      />
 
       <div className="relative z-[2] flex h-full items-center justify-center">
         <MultiplierDisplay value={multiplier} status={roundStatus} />

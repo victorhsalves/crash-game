@@ -1,5 +1,6 @@
 export interface PlaceBetInput {
   readonly playerId: string;
+  readonly playerUsername: string;
   readonly amountCents: number;
   readonly socketId?: string;
 }

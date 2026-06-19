@@ -8,6 +8,9 @@ export class BetOrmEntity {
   @Column({ name: "player_id", type: "uuid" })
   public playerId!: string;
 
+  @Column({ name: "player_username", type: "varchar", length: 255 })
+  public playerUsername!: string;
+
   @Column({ name: "round_id", type: "uuid" })
   public roundId!: string;
 

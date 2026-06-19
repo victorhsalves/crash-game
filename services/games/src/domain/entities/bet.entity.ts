@@ -9,6 +9,7 @@ import { Multiplier } from "../value-objects/multiplier.value-object";
 export interface BetProps {
   readonly id: string;
   readonly playerId: string;
+  readonly playerUsername: string;
   readonly roundId: string;
   readonly amount: Money;
   readonly status?: BetStatus;
@@ -23,6 +24,7 @@ export interface BetProps {
 export interface PlaceBetProps {
   readonly id: string;
   readonly playerId: string;
+  readonly playerUsername: string;
   readonly roundId: string;
   readonly amount: Money;
   readonly socketId?: string | null;
@@ -40,6 +42,7 @@ export class Bet {
 
   private readonly betId: string;
   private readonly betPlayerId: string;
+  private readonly betPlayerUsername: string;
   private readonly betRoundId: string;
   private readonly betAmount: Money;
   private betStatus: BetStatus;
@@ -59,6 +62,10 @@ export class Bet {
       throw new DomainError("Bet player id is required.");
     }
 
+    if (props.playerUsername.trim().length === 0) {
+      throw new DomainError("Bet player username is required.");
+    }
+
     if (props.roundId.trim().length === 0) {
       throw new DomainError("Bet round id is required.");
     }
@@ -73,6 +80,7 @@ export class Bet {
 
     this.betId = props.id;
     this.betPlayerId = props.playerId;
+    this.betPlayerUsername = props.playerUsername;
     this.betRoundId = props.roundId;
     this.betAmount = props.amount;
     this.betStatus = props.status ?? BetStatus.Pending;
@@ -112,6 +120,10 @@ export class Bet {
 
   public get playerId(): string {
     return this.betPlayerId;
+  }
+
+  public get playerUsername(): string {
+    return this.betPlayerUsername;
   }
 
   public get roundId(): string {

@@ -9,6 +9,7 @@ import { RoundLifecycleFields1750000000003 } from "./migrations/1750000000003-Ro
 import { AddCrashAtAndNullableCrashPoint1750000000004 } from "./migrations/1750000000004-AddCrashAtAndNullableCrashPoint";
 import { AddSettlementFields1750000000005 } from "./migrations/1750000000005-AddSettlementFields";
 import { AddProvablyFairFields1750000000006 } from "./migrations/1750000000006-AddProvablyFairFields";
+import { AddBetPlayerUsername1750000000007 } from "./migrations/1750000000007-AddBetPlayerUsername";
 
 export function buildDataSourceOptions(): DataSourceOptions {
   const url = process.env.DATABASE_URL;
@@ -29,6 +30,7 @@ export function buildDataSourceOptions(): DataSourceOptions {
       AddCrashAtAndNullableCrashPoint1750000000004,
       AddSettlementFields1750000000005,
       AddProvablyFairFields1750000000006,
+      AddBetPlayerUsername1750000000007,
     ],
     synchronize: false,
     migrationsRun: false,

@@ -17,11 +17,52 @@ export interface CurrentGameRound {
   crashedAt: string | null;
   finishedAt: string | null;
   createdAt: string;
+  bets: RoundBetPublic[];
+}
+
+export type RoundBetPublicStatus = "ACCEPTED" | "CASHED_OUT" | "LOST";
+
+export interface RoundBetPublic {
+  id: string;
+  username: string;
+  amountCents: number;
+  status: RoundBetPublicStatus;
+  multiplier: string | null;
+  payoutCents: number | null;
+  cashedOutAt: string | null;
+}
+
+export interface RoundBetListItem extends RoundBetPublic {
+  isPending?: boolean;
+}
+
+export interface RoundBetAddedWebSocketPayload {
+  roundId: string;
+  bet: RoundBetPublic;
+}
+
+export interface RoundBetUpdatedWebSocketPayload {
+  roundId: string;
+  betId: string;
+  status: RoundBetPublicStatus;
+  multiplier: string | null;
+  payoutCents: number | null;
+  cashedOutAt: string | null;
 }
 
 export interface PlaceBetResponse {
   betId: string;
   status: "PENDING";
+}
+
+export interface CashoutBetResponse {
+  betId: string;
+  roundId: string;
+  status: "CASHED_OUT";
+  multiplier: number;
+  payout: number;
+  cashedOutAt: string;
+  alreadyCashedOut: boolean;
 }
 
 export interface RoundBettingOpenedWebSocketPayload {
@@ -124,7 +165,24 @@ export interface BetUpdatedWebSocketPayload {
   walletCredited?: boolean;
 }
 
-export interface BetCashoutFailedWebSocketPayload {
-  code: string;
-  message: string;
+export interface BetRejectedWebSocketPayload {
+  betId: string;
+  status: "REJECTED";
+  reason: string;
+}
+
+export interface BetHistoryItem {
+  id: string;
+  playerId: string;
+  roundId: string;
+  amount: string;
+  status: BetStatus;
+  createdAt: string;
+  cashoutMultiplier: string | null;
+  payoutAmount: string | null;
+  cashedOutAt: string | null;
+}
+
+export interface BetHistoryResponse {
+  items: BetHistoryItem[];
 }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ActionPanel } from "@/components/validation/action-panel";
+import { BetHistoryModal } from "@/components/validation/bet-history-modal";
 import { CrashGameStage } from "@/components/validation/crash-game-stage";
 import { EventLogModal } from "@/components/validation/event-log-modal";
 import { ProvablyFairModal } from "@/components/validation/provably-fair-modal";
@@ -8,11 +9,14 @@ import { RoundHistoryStrip } from "@/components/validation/round-history-strip";
 import { CrashGameTopBar } from "@/components/validation/crash-game-top-bar";
 import { useAuth } from "@/hooks/use-auth";
 import { useBetAmount } from "@/hooks/use-bet-amount";
+import { useBetHistory } from "@/hooks/use-bet-history";
 import { useBetState } from "@/hooks/use-bet-state";
 import { useCashout } from "@/hooks/use-cashout";
 import { useCrashMultiplier } from "@/hooks/use-crash-multiplier";
 import { useEventLog } from "@/hooks/use-event-log";
+import { useCurrentUser } from "@/hooks/use-current-user";
 import { usePlaceBet } from "@/hooks/use-place-bet";
+import { useRoundBets } from "@/hooks/use-round-bets";
 import { useRoundHistory } from "@/hooks/use-round-history";
 import { useRoundState } from "@/hooks/use-round-state";
 import { useRoundVerification } from "@/hooks/use-round-verification";
@@ -25,14 +29,25 @@ import type { BetUpdatedWebSocketPayload } from "@/types/game.types";
 export function CrashGamePage() {
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuth();
+  const { data: currentUser } = useCurrentUser();
   const [isEventLogOpen, setIsEventLogOpen] = useState(false);
+  const [isBetHistoryOpen, setIsBetHistoryOpen] = useState(false);
   const [verificationRoundId, setVerificationRoundId] = useState<string | null>(null);
   const [isVerificationOpen, setIsVerificationOpen] = useState(false);
   const { entries, append, clear, scrollRef } = useEventLog();
   const { amount, increment, decrement, setAmount } = useBetAmount();
   const { betState, setPendingBet, handleBetEvent, resetBetState } = useBetState();
   const { roundState, remainingSeconds, handleRoundEvent } = useRoundState();
+  const {
+    bets: roundBets,
+    isLoading: isRoundBetsLoading,
+    addOptimisticBet,
+    removeOptimisticBet,
+    handleRoundBetEvent,
+    hydrate: hydrateRoundBets,
+  } = useRoundBets(roundState.roundId);
   const { items: historyItems, isLoading: isHistoryLoading, refresh: refreshHistory } = useRoundHistory();
+  const betHistory = useBetHistory({ isOpen: isBetHistoryOpen });
   const { state: verificationState } = useRoundVerification(verificationRoundId, isVerificationOpen);
   const { displayValue, curvePoints, chartPhase, handleMultiplierEvent, syncFromRound } =
     useCrashMultiplier();
@@ -49,6 +64,10 @@ export function CrashGamePage() {
     void queryClient.invalidateQueries({ queryKey: ["wallet", "me"] });
   }, [queryClient]);
 
+  const refreshBetHistory = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["games", "bets", "me"] });
+  }, [queryClient]);
+
   useEffect(() => {
     void gameApi.getCurrentRound().then(syncFromRound).catch(() => {});
   }, [syncFromRound]);
@@ -56,8 +75,12 @@ export function CrashGamePage() {
   const handlePlaceBetSuccess = useCallback(
     (response: { betId: string }) => {
       setPendingBet(response.betId, amount * 100);
+
+      if (currentUser?.username !== undefined) {
+        addOptimisticBet(response.betId, currentUser.username, amount * 100);
+      }
     },
-    [amount, setPendingBet],
+    [amount, setPendingBet, currentUser?.username, addOptimisticBet],
   );
 
   const { placeBet, isPending } = usePlaceBet({
@@ -72,6 +95,11 @@ export function CrashGamePage() {
       handleBetEvent(event, payload);
       handleCashoutEvent(event, payload);
       handleRoundEventForPopup(event);
+      handleRoundBetEvent(event, payload);
+
+      if (event === WebSocketEvents.BetRejected && typeof payload === "object" && payload !== null && "betId" in payload) {
+        removeOptimisticBet((payload as { betId: string }).betId);
+      }
 
       if (event === WebSocketEvents.BetAccepted) {
         refreshWallet();
@@ -88,10 +116,13 @@ export function CrashGamePage() {
         if (updated.walletCredited === true) {
           refreshWallet();
         }
+
+        refreshBetHistory();
       }
 
       if (event === WebSocketEvents.RoundFinished) {
         void gameApi.getCurrentRound().then(syncFromRound).catch(() => {});
+        void hydrateRoundBets();
         resetBetState();
       }
 
@@ -103,10 +134,14 @@ export function CrashGamePage() {
       handleBetEvent,
       handleCashoutEvent,
       handleMultiplierEvent,
+      handleRoundBetEvent,
       handleRoundEvent,
       handleRoundEventForPopup,
+      hydrateRoundBets,
       refreshWallet,
       refreshHistory,
+      refreshBetHistory,
+      removeOptimisticBet,
       resetBetState,
       syncFromRound,
     ],
@@ -121,8 +156,28 @@ export function CrashGamePage() {
     });
   }, [amount, placeBet]);
 
+  const handleToggleBetHistory = useCallback(() => {
+    setIsBetHistoryOpen((open) => {
+      const next = !open;
+      if (next) {
+        setIsEventLogOpen(false);
+      }
+      return next;
+    });
+  }, []);
+
   const handleToggleEventLog = useCallback(() => {
-    setIsEventLogOpen((open) => !open);
+    setIsEventLogOpen((open) => {
+      const next = !open;
+      if (next) {
+        setIsBetHistoryOpen(false);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleCloseBetHistory = useCallback(() => {
+    setIsBetHistoryOpen(false);
   }, []);
 
   const handleCloseEventLog = useCallback(() => {
@@ -144,6 +199,8 @@ export function CrashGamePage() {
       <CrashGameTopBar
         roundState={roundState}
         remainingSeconds={remainingSeconds}
+        isBetHistoryOpen={isBetHistoryOpen}
+        onToggleBetHistory={handleToggleBetHistory}
         isEventLogOpen={isEventLogOpen}
         onToggleEventLog={handleToggleEventLog}
       />
@@ -164,6 +221,9 @@ export function CrashGamePage() {
         betAmountCents={betState.amountCents}
         betStatus={betState.status}
         betPayout={betState.payout}
+        roundBets={roundBets}
+        roundBetsLoading={isRoundBetsLoading}
+        currentUsername={currentUser?.username}
       />
       <ActionPanel
         amount={amount}
@@ -177,6 +237,18 @@ export function CrashGamePage() {
         onAmountChange={setAmount}
         onPlaceBet={handlePlaceBet}
         onCashout={cashout}
+      />
+      <BetHistoryModal
+        open={isBetHistoryOpen}
+        onClose={handleCloseBetHistory}
+        items={betHistory.items}
+        isLoading={betHistory.isLoading}
+        isError={betHistory.isError}
+        error={betHistory.error instanceof Error ? betHistory.error : null}
+        hasMore={betHistory.hasMore}
+        isLoadingMore={betHistory.isLoadingMore}
+        onLoadMore={betHistory.loadMore}
+        onRetry={() => void betHistory.refetch()}
       />
       <EventLogModal
         open={isEventLogOpen}
