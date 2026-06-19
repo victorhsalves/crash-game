@@ -4,11 +4,13 @@ import {
   type EventBroadcaster,
 } from "@crash/websocket";
 import { Controller, Inject, Post } from "@nestjs/common";
+import { ApiExcludeController } from "@nestjs/swagger";
 
 interface PublishTestWebSocketResponse {
   readonly published: true;
 }
 
+@ApiExcludeController()
 @Controller("internal")
 export class InternalTestWebSocketController {
   public constructor(

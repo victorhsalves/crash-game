@@ -9,6 +9,16 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import type { AuthenticatedUser } from "@crash/auth";
 import { CurrentUser, JwtAuthGuard } from "@crash/auth";
 import { GetBetByIdUseCase } from "../../application/use-cases/get-bet-by-id/get-bet-by-id.use-case";
@@ -18,6 +28,7 @@ import { PlaceBetUseCase } from "../../application/use-cases/place-bet/place-bet
 import { VerifyRoundUseCase } from "../../application/use-cases/verify-round/verify-round.use-case";
 import { CashoutBetUseCase } from "../../application/use-cases/cashout-bet/cashout-bet.use-case";
 import { BetWebSocketNotifier } from "../../infrastructure/websocket/bet-websocket.notifier";
+import { ApiErrorResponseDto } from "../dtos/api-error-response.dto";
 import { BetResponseDto } from "../dtos/bet-response.dto";
 import { CashoutBetResponseDto } from "../dtos/cashout-bet-response.dto";
 import { CurrentRoundResponseDto } from "../dtos/current-round-response.dto";
@@ -29,6 +40,7 @@ import { PlayerBetHistoryResponseDto } from "../dtos/player-bet-history-response
 import { RoundHistoryResponseDto } from "../dtos/round-history-response.dto";
 import { VerifyRoundResponseDto } from "../dtos/verify-round-response.dto";
 
+@ApiTags("games")
 @Controller()
 export class GamesController {
   public constructor(
@@ -43,11 +55,17 @@ export class GamesController {
   ) {}
 
   @Get("health")
+  @ApiTags("health")
+  @ApiOperation({ summary: "Health check" })
+  @ApiOkResponse({ type: HealthCheckResponseDto })
   check(): HealthCheckResponseDto {
     return { status: "ok", service: "games" };
   }
 
   @Get("rounds/current")
+  @ApiTags("rounds")
+  @ApiOperation({ summary: "Estado da rodada atual com apostas" })
+  @ApiOkResponse({ type: CurrentRoundResponseDto })
   async getCurrentRound(): Promise<CurrentRoundResponseDto> {
     const { round, bets } = await this.getCurrentRoundUseCase.execute();
 
@@ -55,6 +73,11 @@ export class GamesController {
   }
 
   @Get("rounds/history")
+  @ApiTags("rounds")
+  @ApiOperation({ summary: "Histórico paginado de rodadas" })
+  @ApiQuery({ name: "limit", required: false, type: Number, example: 20 })
+  @ApiQuery({ name: "offset", required: false, type: Number, example: 0 })
+  @ApiOkResponse({ type: RoundHistoryResponseDto })
   async getRoundHistory(
     @Query("limit") limit?: string,
     @Query("offset") offset?: string,
@@ -70,14 +93,25 @@ export class GamesController {
   }
 
   @Get("rounds/:roundId/verify")
+  @ApiTags("rounds")
+  @ApiOperation({ summary: "Dados de verificação provably fair" })
+  @ApiParam({ name: "roundId", format: "uuid" })
+  @ApiOkResponse({ type: VerifyRoundResponseDto })
+  @ApiResponse({ status: 404, type: ApiErrorResponseDto })
   async verifyRound(@Param("roundId") roundId: string): Promise<VerifyRoundResponseDto> {
     const result = await this.verifyRoundUseCase.execute({ roundId });
     return VerifyRoundResponseDto.fromResult(result);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("bearer")
   @Post("bet")
+  @ApiTags("bets")
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Fazer aposta na rodada atual" })
+  @ApiCreatedResponse({ type: PlaceBetResponseDto })
+  @ApiResponse({ status: 409, type: ApiErrorResponseDto })
+  @ApiResponse({ status: 422, type: ApiErrorResponseDto })
   async placeBet(
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: PlaceBetDto,
@@ -93,8 +127,15 @@ export class GamesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("bearer")
   @Post("bet/cashout")
+  @ApiTags("bets")
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Sacar no multiplicador atual" })
+  @ApiOkResponse({ type: CashoutBetResponseDto })
+  @ApiResponse({ status: 404, type: ApiErrorResponseDto })
+  @ApiResponse({ status: 409, type: ApiErrorResponseDto })
+  @ApiResponse({ status: 422, type: ApiErrorResponseDto })
   async cashout(@CurrentUser() user: AuthenticatedUser): Promise<CashoutBetResponseDto> {
     const result = await this.cashoutBetUseCase.execute({ playerId: user.id });
 
@@ -104,7 +145,13 @@ export class GamesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("bearer")
   @Get("bets/me")
+  @ApiTags("bets")
+  @ApiOperation({ summary: "Histórico de apostas do jogador (paginado)" })
+  @ApiQuery({ name: "limit", required: false, type: Number, example: 20 })
+  @ApiQuery({ name: "offset", required: false, type: Number, example: 0 })
+  @ApiOkResponse({ type: PlayerBetHistoryResponseDto })
   async getMyBets(
     @CurrentUser() user: AuthenticatedUser,
     @Query("limit") limit?: string,
@@ -122,7 +169,13 @@ export class GamesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("bearer")
   @Get("bets/:id")
+  @ApiTags("bets")
+  @ApiOperation({ summary: "Obter aposta por ID" })
+  @ApiParam({ name: "id", format: "uuid" })
+  @ApiOkResponse({ type: BetResponseDto })
+  @ApiResponse({ status: 404, type: ApiErrorResponseDto })
   async getBetById(
     @CurrentUser() user: AuthenticatedUser,
     @Param("id") betId: string,

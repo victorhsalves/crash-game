@@ -8,6 +8,7 @@ import express from "express";
 import { AppModule } from "./app.module";
 import { ApplicationExceptionFilter } from "./presentation/filters/application-exception.filter";
 import { DomainExceptionFilter } from "./presentation/filters/domain-exception.filter";
+import { setupSwagger } from "./presentation/swagger/setup-swagger";
 
 async function bootstrap(): Promise<void> {
   const expressApp = express();
@@ -21,6 +22,7 @@ async function bootstrap(): Promise<void> {
   app.useWebSocketAdapter(new IoAdapter(httpServer));
   app.useGlobalFilters(new ApplicationExceptionFilter(), new DomainExceptionFilter());
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  setupSwagger(app);
 
   await app.listen(port, "0.0.0.0");
   console.log(`Games service running on port ${port}`);

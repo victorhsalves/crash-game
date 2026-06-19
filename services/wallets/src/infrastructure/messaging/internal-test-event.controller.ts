@@ -6,12 +6,14 @@ import {
   type EventPublisher,
 } from "@crash/messaging";
 import { Controller, Inject, Logger, Post } from "@nestjs/common";
+import { ApiExcludeController } from "@nestjs/swagger";
 
 interface PublishTestEventResponse {
   readonly eventId: string;
   readonly published: true;
 }
 
+@ApiExcludeController()
 @Controller("internal")
 export class InternalTestEventController {
   private readonly logger = new Logger(InternalTestEventController.name);

@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { GameRound } from "../../domain/entities/game-round.entity";
 import { RoundStatus } from "../../domain/enums/round-status.enum";
 import type { Bet } from "../../domain/entities/bet.entity";
@@ -8,18 +9,43 @@ function formatMultiplierValue(value: number): string {
 }
 
 export class CurrentRoundResponseDto {
+  @ApiProperty({ format: "uuid" })
   id!: string;
+
+  @ApiProperty({ enum: RoundStatus, enumName: "RoundStatus" })
   status!: RoundStatus;
+
+  @ApiProperty({ example: "1.50", nullable: true })
   currentMultiplier!: string | null;
+
+  @ApiProperty({ example: "2.34", nullable: true })
   crashPoint!: string | null;
+
+  @ApiProperty({ nullable: true })
   serverSeedHash!: string | null;
+
+  @ApiProperty({ nullable: true })
   clientSeed!: string | null;
+
+  @ApiProperty({ nullable: true })
   nonce!: number | null;
+
+  @ApiProperty({ format: "date-time", nullable: true })
   bettingEndsAt!: string | null;
+
+  @ApiProperty({ format: "date-time", nullable: true })
   startedAt!: string | null;
+
+  @ApiProperty({ format: "date-time", nullable: true })
   crashedAt!: string | null;
+
+  @ApiProperty({ format: "date-time", nullable: true })
   finishedAt!: string | null;
+
+  @ApiProperty({ format: "date-time" })
   createdAt!: string;
+
+  @ApiProperty({ type: [RoundBetPublicDto] })
   bets!: RoundBetPublicDto[];
 
   public static fromDomain(gameRound: GameRound, bets: Bet[] = []): CurrentRoundResponseDto {

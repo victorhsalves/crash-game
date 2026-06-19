@@ -1,7 +1,9 @@
+import { ApiProperty } from "@nestjs/swagger";
 import type { GetPlayerBetHistoryResult } from "../../application/use-cases/get-player-bet-history/get-player-bet-history.input";
 import { BetResponseDto } from "./bet-response.dto";
 
 export class PlayerBetHistoryResponseDto {
+  @ApiProperty({ type: [BetResponseDto] })
   items!: BetResponseDto[];
 
   public static fromResult(result: GetPlayerBetHistoryResult): PlayerBetHistoryResponseDto {

@@ -1,3 +1,4 @@
+import { ApiProperty } from "@nestjs/swagger";
 import type { Bet } from "../../domain/entities/bet.entity";
 import { BetStatus } from "../../domain/enums/bet-status.enum";
 import { RoundStatus } from "../../domain/enums/round-status.enum";
@@ -5,12 +6,25 @@ import { RoundStatus } from "../../domain/enums/round-status.enum";
 export type RoundBetPublicStatus = "ACCEPTED" | "CASHED_OUT" | "LOST";
 
 export class RoundBetPublicDto {
+  @ApiProperty({ format: "uuid" })
   public id!: string;
+
+  @ApiProperty({ example: "player" })
   public username!: string;
+
+  @ApiProperty({ example: 1000 })
   public amountCents!: number;
+
+  @ApiProperty({ enum: ["ACCEPTED", "CASHED_OUT", "LOST"], example: "ACCEPTED" })
   public status!: RoundBetPublicStatus;
+
+  @ApiProperty({ example: "2.50", nullable: true })
   public multiplier!: string | null;
+
+  @ApiProperty({ example: 2500, nullable: true })
   public payoutCents!: number | null;
+
+  @ApiProperty({ format: "date-time", nullable: true })
   public cashedOutAt!: string | null;
 
   public static fromDomain(bet: Bet, roundStatus: RoundStatus): RoundBetPublicDto | null {
