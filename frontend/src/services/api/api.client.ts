@@ -1,5 +1,5 @@
 import { ApiError, UnauthorizedError } from "@/services/api/api-error";
-import { authService } from "@/services/auth/auth.service";
+import { authService, clearSession } from "@/services/auth/auth.service";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -27,7 +27,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   });
 
   if (response.status === 401) {
-    authService.logout();
+    clearSession();
     unauthorizedHandler?.();
     throw new UnauthorizedError();
   }

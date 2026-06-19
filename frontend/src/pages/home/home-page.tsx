@@ -1,34 +1,18 @@
-import { useNavigate } from "@tanstack/react-router";
-import { useState, type FormEvent } from "react";
+import { useSearch } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { authService } from "@/services/auth/auth.service";
 
 export function HomePage() {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("player");
-  const [password, setPassword] = useState("player123");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const search = useSearch({ from: "/" });
 
   if (isAuthenticated) {
     return null;
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
-
-    try {
-      await authService.login(username, password);
-      await navigate({ to: "/dashboard" });
-    } catch (loginError) {
-      setError(loginError instanceof Error ? loginError.message : "Falha na autenticacao");
-    } finally {
-      setIsSubmitting(false);
-    }
+  function handleLogin() {
+    void authService.loginRedirect();
   }
 
   return (
@@ -38,37 +22,26 @@ export function HomePage() {
         <p className="mt-2 text-muted">Faca login para acessar sua conta e carteira.</p>
       </div>
 
-      <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-muted">Username</span>
-          <input
-            type="text"
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            autoComplete="username"
-            required
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-primary"
-          />
-        </label>
+      {search.session_expired ? (
+        <p className="rounded-lg border border-border bg-surface px-4 py-3 text-sm text-muted">
+          Sua sessao expirou. Faca login novamente.
+        </p>
+      ) : null}
 
-        <label className="flex flex-col gap-2 text-sm">
-          <span className="text-muted">Password</span>
-          <input
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            autoComplete="current-password"
-            required
-            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-primary"
-          />
-        </label>
+      {search.auth_error ? (
+        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+          {search.auth_error}
+        </p>
+      ) : null}
 
-        {error ? <p className="text-sm text-danger">{error}</p> : null}
+      <Button type="button" onClick={handleLogin}>
+        Entrar com Keycloak
+      </Button>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Entrando..." : "Entrar"}
-        </Button>
-      </form>
+      <p className="text-center text-sm text-muted">
+        Usuario de teste: <span className="text-foreground">player</span> /{" "}
+        <span className="text-foreground">player123</span>
+      </p>
     </div>
   );
 }

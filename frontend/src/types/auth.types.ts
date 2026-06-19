@@ -10,6 +10,7 @@ export interface TokenResponse {
   refresh_expires_in: number;
   refresh_token: string;
   token_type: string;
+  id_token?: string;
   "not-before-policy": number;
   session_state: string;
   scope: string;
@@ -18,6 +19,13 @@ export interface TokenResponse {
 export interface StoredSession {
   accessToken: string;
   refreshToken: string;
+  idToken?: string;
   expiresAt: number;
   refreshExpiresAt: number;
+}
+
+export interface PkceState {
+  codeVerifier: string;
+  state: string;
+  returnTo?: string;
 }

@@ -6,11 +6,13 @@ import {
   redirect,
 } from "@tanstack/react-router";
 import { AppShell } from "@/components/layout/app-shell";
+import { AuthCallbackPage } from "@/pages/auth/auth-callback-page";
 import { CrashGamePage } from "@/pages/crash-game/crash-game-page";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
 import { WebSocketTestPage } from "@/pages/dev/websocket-test-page";
 import { HomePage } from "@/pages/home/home-page";
 import { useAuthStore } from "@/stores/auth.store";
+import { emptyHomeSearch } from "@/router/search";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -23,6 +25,11 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
+  validateSearch: (search: Record<string, unknown>) => ({
+    auth_error: typeof search.auth_error === "string" ? search.auth_error : undefined,
+    session_expired:
+      typeof search.session_expired === "string" ? search.session_expired : undefined,
+  }),
   beforeLoad: () => {
     const { isAuthenticated, isInitialized } = useAuthStore.getState();
 
@@ -33,6 +40,19 @@ const indexRoute = createRoute({
   component: HomePage,
 });
 
+const authCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/auth/callback",
+  validateSearch: (search: Record<string, unknown>) => ({
+    code: typeof search.code === "string" ? search.code : undefined,
+    state: typeof search.state === "string" ? search.state : undefined,
+    error: typeof search.error === "string" ? search.error : undefined,
+    error_description:
+      typeof search.error_description === "string" ? search.error_description : undefined,
+  }),
+  component: AuthCallbackPage,
+});
+
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
@@ -40,7 +60,7 @@ const dashboardRoute = createRoute({
     const { isAuthenticated, isInitialized } = useAuthStore.getState();
 
     if (isInitialized && !isAuthenticated) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/", search: emptyHomeSearch });
     }
   },
   component: DashboardPage,
@@ -59,7 +79,7 @@ const crashGameRoute = createRoute({
     const { isAuthenticated, isInitialized } = useAuthStore.getState();
 
     if (isInitialized && !isAuthenticated) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/", search: emptyHomeSearch });
     }
   },
   component: CrashGamePage,
@@ -67,6 +87,7 @@ const crashGameRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  authCallbackRoute,
   dashboardRoute,
   websocketTestRoute,
   crashGameRoute,
