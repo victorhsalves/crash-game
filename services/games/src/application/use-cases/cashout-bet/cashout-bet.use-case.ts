@@ -99,6 +99,7 @@ export class CashoutBetUseCase {
       multiplier: bet.cashoutMultiplier.value,
       payout: Number(bet.payoutAmount.value) / 100,
       cashedOutAt: bet.cashedOutAt,
+      socketId: bet.socketId,
       alreadyCashedOut,
     };
   }

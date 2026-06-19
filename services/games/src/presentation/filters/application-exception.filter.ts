@@ -1,8 +1,10 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from "@nestjs/common";
 import { ApplicationError } from "../../application/errors/application-error";
+import { BetAlreadySettledError } from "../../application/errors/bet-already-settled.error";
 import { BetNotFoundError } from "../../application/errors/bet-not-found.error";
 import { CurrentRoundNotFoundError } from "../../application/errors/current-round-not-found.error";
 import { DuplicateBetError } from "../../application/errors/duplicate-bet.error";
+import { RoundAlreadyCrashedError } from "../../application/errors/round-already-crashed.error";
 
 interface HttpResponse {
   status(code: number): { json(body: unknown): void };
@@ -31,6 +33,14 @@ export class ApplicationExceptionFilter implements ExceptionFilter {
     }
 
     if (exception instanceof DuplicateBetError) {
+      return HttpStatus.CONFLICT;
+    }
+
+    if (exception instanceof RoundAlreadyCrashedError) {
+      return HttpStatus.CONFLICT;
+    }
+
+    if (exception instanceof BetAlreadySettledError) {
       return HttpStatus.CONFLICT;
     }
 

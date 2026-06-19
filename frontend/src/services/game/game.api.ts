@@ -1,5 +1,12 @@
 import { apiClient } from "@/services/api/api.client";
-import type { CurrentGameRound, PlaceBetResponse, RoundHistoryItem, RoundVerification } from "@/types/game.types";
+import type {
+  BetHistoryResponse,
+  CashoutBetResponse,
+  CurrentGameRound,
+  PlaceBetResponse,
+  RoundHistoryItem,
+  RoundVerification,
+} from "@/types/game.types";
 
 export const gameApi = {
   getCurrentRound(): Promise<CurrentGameRound> {
@@ -21,5 +28,13 @@ export const gameApi = {
       amountCents,
       ...(socketId !== undefined ? { socketId } : {}),
     });
+  },
+
+  cashout(): Promise<CashoutBetResponse> {
+    return apiClient.post<CashoutBetResponse>("/games/bet/cashout");
+  },
+
+  getMyBets(limit = 20, offset = 0): Promise<BetHistoryResponse> {
+    return apiClient.get<BetHistoryResponse>(`/games/bets/me?limit=${limit}&offset=${offset}`);
   },
 };
