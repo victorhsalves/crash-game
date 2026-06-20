@@ -60,8 +60,8 @@ flowchart LR
 ## Setup rápido
 
 ```bash
-git clone <repo-url>
-cd fullstack-challenge
+git clone https://github.com/victorhsalves/crash-game
+cd crash-game
 bun install
 bun run docker:up      # env:ensure + docker compose up
 ```
