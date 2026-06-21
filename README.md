@@ -53,7 +53,7 @@ flowchart LR
 
 - Docker e Docker Compose
 - Node.js (apenas para `npm run docker:up` / `env:ensure` no host)
-- Portas livres: `3000`, `4001`, `4002`, `5432`, `5672`, `8000`, `8080`, `15672`
+- Portas livres: `3000`, `3500`, `4001`, `4002`, `5672`, `8000`, `8080`, `15672`
 
 ---
 
