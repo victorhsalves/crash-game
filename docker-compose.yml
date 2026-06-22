@@ -5,7 +5,7 @@ services:
   postgres:
     image: postgres:18.3-alpine
     ports:
-      - "5432:5432"
+      - "3500:5432"
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
