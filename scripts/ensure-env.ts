@@ -1,6 +1,6 @@
 import { copyFileSync, existsSync } from "node:fs";
 
-const targets = ["services/games/.env", "services/wallets/.env"];
+const targets = ["services/games/.env", "services/wallets/.env", "frontend/.env"];
 
 for (const envPath of targets) {
   if (existsSync(envPath)) continue;
