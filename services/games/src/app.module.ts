@@ -9,7 +9,7 @@ import { GamesController } from "./presentation/controllers/games.controller";
 
 @Module({
   imports: [
-    AuthModule.forRoot(),
+    AuthModule.forRoot({ enableUserRegistration: true }),
     PersistenceModule,
     ApplicationModule,
     MessagingInfrastructureModule,

@@ -1,18 +1,35 @@
-import { useSearch } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 import { authService } from "@/services/auth/auth.service";
 
 export function HomePage() {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const search = useSearch({ from: "/" });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (isAuthenticated) {
     return null;
   }
 
-  function handleLogin() {
-    void authService.loginRedirect();
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      await authService.login(username, password);
+      await navigate({ to: "/dashboard" });
+    } catch (loginError) {
+      setError(loginError instanceof Error ? loginError.message : "Falha na autenticacao");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -28,19 +45,47 @@ export function HomePage() {
         </p>
       ) : null}
 
-      {search.auth_error ? (
-        <p className="rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
-          {search.auth_error}
-        </p>
-      ) : null}
+      <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-2 text-sm">
+          <span className="text-muted">Username</span>
+          <input
+            type="text"
+            value={username}
+            onChange={(event) => setUsername(event.target.value)}
+            autoComplete="username"
+            required
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-primary"
+          />
+        </label>
 
-      <Button type="button" onClick={handleLogin}>
-        Entrar com Keycloak
-      </Button>
+        <label className="flex flex-col gap-2 text-sm">
+          <span className="text-muted">Password</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            required
+            className="rounded-lg border border-border bg-surface px-3 py-2 text-foreground outline-none focus:border-primary"
+          />
+        </label>
+
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
+
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Entrando..." : "Entrar"}
+        </Button>
+      </form>
 
       <p className="text-center text-sm text-muted">
-        Usuario de teste: <span className="text-foreground">player</span> /{" "}
-        <span className="text-foreground">player123</span>
+        Nao tem conta?{" "}
+        <button
+          type="button"
+          onClick={() => void navigate({ to: "/register" })}
+          className="text-primary underline-offset-2 hover:underline"
+        >
+          Criar conta
+        </button>
       </p>
     </div>
   );

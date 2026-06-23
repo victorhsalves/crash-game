@@ -4,9 +4,6 @@
   "workspaces": {
     "": {
       "name": "crash-game",
-      "devDependencies": {
-        "bun-types": "latest",
-      },
     },
     "frontend": {
       "name": "@crash/frontend",
@@ -36,7 +33,10 @@
       "version": "0.0.1",
       "dependencies": {
         "@nestjs/common": "^11.1.17",
+        "@nestjs/core": "^11.1.17",
         "@nestjs/passport": "^11.0.5",
+        "class-transformer": "^0.5.1",
+        "class-validator": "^0.15.1",
         "jwks-rsa": "^3.2.0",
         "passport": "^0.7.0",
         "passport-jwt": "^4.0.1",

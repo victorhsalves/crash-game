@@ -17,7 +17,7 @@ O projeto é um **Crash Game** multiplayer: jogadores apostam antes da rodada, a
 - **Frontend** — Vite + React 19, gráfico animado, apostas ao vivo, histórico, verificação provably fair
 - **5 pacotes compartilhados** — `@crash/auth`, `@crash/messaging`, `@crash/money`, `@crash/provably-fair`, `@crash/websocket`
 
-### URLs locais (após `bun run docker:up`)
+### URLs locais (após `npm run docker:up`)
 
 | Serviço | URL |
 |---------|-----|
@@ -51,9 +51,9 @@ flowchart LR
 
 ## Pré-requisitos
 
-- [Bun](https://bun.sh) >= 1.x
 - Docker e Docker Compose
-- Portas livres: `3000`, `4001`, `4002`, `5432`, `5672`, `8000`, `8080`, `15672`
+- Node.js (apenas para `npm run docker:up` / `env:ensure` no host)
+- Portas livres: `3000`, `3500`, `4001`, `4002`, `5672`, `8000`, `8080`, `15672`
 
 ---
 
@@ -62,8 +62,7 @@ flowchart LR
 ```bash
 git clone https://github.com/victorhsalves/crash-game
 cd crash-game
-bun install
-bun run docker:up      # env:ensure + docker compose up
+npm run docker:up      # env:ensure + docker compose up
 ```
 
 O comando `docker:up` executa `env:ensure` antes do Compose. Esse script cria `services/games/.env` e `services/wallets/.env` a partir dos respectivos `.env.example` **somente quando ainda não existem**. Customizações em `.env` existentes são preservadas.
@@ -71,8 +70,8 @@ O comando `docker:up` executa `env:ensure` antes do Compose. Esse script cria `s
 **Outros comandos:**
 
 ```bash
-bun run docker:down    # para os containers
-bun run docker:prune   # remove containers, volumes e imagens (reset completo)
+npm run docker:down    # para os containers
+npm run docker:prune   # remove containers, volumes e imagens (reset completo)
 ```
 
 Após subir, acesse http://localhost:3000, faça login com o usuário de teste e jogue.
@@ -133,7 +132,7 @@ O realm Keycloak `crash-game` é importado automaticamente no `docker:up`.
 
 Ao criar a carteira (automático no primeiro login ou via `POST /wallets`), o jogador recebe **R$ 20,00** (`INITIAL_WALLET_BALANCE_CENTS=2000`). A operação gera uma transação auditável com `referenceId: "initial-balance"`.
 
-**Reset de estado:** se a carteira do `player` já existir de uma sessão anterior, o saldo não é resetado. Use `bun run docker:prune` seguido de `bun run docker:up` para um ambiente limpo.
+**Reset de estado:** se a carteira do `player` já existir de uma sessão anterior, o saldo não é resetado. Use `npm run docker:prune` seguido de `npm run docker:up` para um ambiente limpo.
 
 ### Fluxo do jogador
 
@@ -347,7 +346,7 @@ Ações do jogador (apostar, sacar) são feitas via **REST**. WebSocket é exclu
 
 **Infra e setup**
 
-- [ ] `bun run docker:up` sobe tudo sem passos manuais (fresh clone)
+- [ ] `npm run docker:up` sobe tudo sem passos manuais (fresh clone)
 - [ ] Frontend em http://localhost:3000, login Keycloak funciona
 - [ ] Gameplay: apostar → multiplicador → cashout REST → saldo atualizado após crash
 

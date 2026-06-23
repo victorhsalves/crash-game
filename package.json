@@ -7,12 +7,9 @@
     "frontend"
   ],
   "scripts": {
-    "env:ensure": "bun scripts/ensure-env.ts",
-    "docker:up": "bun run env:ensure && docker compose up",
+    "env:ensure": "node scripts/ensure-env.js",
+    "docker:up": "npm run env:ensure && docker compose up",
     "docker:down": "docker compose down",
     "docker:prune": "docker compose down -v --rmi all --remove-orphans && docker volume prune -f"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
   }
 }

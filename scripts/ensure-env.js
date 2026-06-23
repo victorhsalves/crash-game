@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync } from "node:fs";
+const { copyFileSync, existsSync } = require("node:fs");
 
 const targets = ["services/games/.env", "services/wallets/.env", "frontend/.env"];
 

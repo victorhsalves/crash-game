@@ -1,14 +1,9 @@
 import { useAuthStore } from "@/stores/auth.store";
-import type { PkceState, StoredSession, TokenResponse } from "@/types/auth.types";
-import { OIDC_CONFIG } from "@/services/auth/oidc.constants";
-import {
-  generateCodeChallenge,
-  generateCodeVerifier,
-  generateState,
-} from "@/services/auth/pkce.util";
+import type { StoredSession, TokenResponse } from "@/types/auth.types";
 
 const SESSION_STORAGE_KEY = "crash-game.auth.session";
-const PKCE_STORAGE_KEY = "crash-game.auth.pkce";
+const TOKEN_URL = `${import.meta.env.VITE_OIDC_AUTHORITY}/protocol/openid-connect/token`;
+const CLIENT_ID = import.meta.env.VITE_OIDC_CLIENT_ID;
 
 let sessionExpiredHandler: (() => void) | null = null;
 
@@ -36,7 +31,6 @@ function saveSession(tokens: TokenResponse): void {
   const session: StoredSession = {
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
-    idToken: tokens.id_token,
     expiresAt: now + tokens.expires_in * 1000,
     refreshExpiresAt: now + tokens.refresh_expires_in * 1000,
   };
@@ -50,31 +44,8 @@ export function clearSession(): void {
   useAuthStore.getState().clear();
 }
 
-function loadPkceState(): PkceState | null {
-  const raw = sessionStorage.getItem(PKCE_STORAGE_KEY);
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as PkceState;
-  } catch {
-    sessionStorage.removeItem(PKCE_STORAGE_KEY);
-    return null;
-  }
-}
-
-function savePkceState(state: PkceState): void {
-  sessionStorage.setItem(PKCE_STORAGE_KEY, JSON.stringify(state));
-}
-
-function clearPkceState(): void {
-  sessionStorage.removeItem(PKCE_STORAGE_KEY);
-}
-
 async function requestToken(body: URLSearchParams): Promise<TokenResponse> {
-  const response = await fetch(OIDC_CONFIG.tokenUrl, {
+  const response = await fetch(TOKEN_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -100,7 +71,7 @@ async function refreshSession(session: StoredSession): Promise<string | null> {
   const tokens = await requestToken(
     new URLSearchParams({
       grant_type: "refresh_token",
-      client_id: OIDC_CONFIG.clientId,
+      client_id: CLIENT_ID,
       refresh_token: session.refreshToken,
     }),
   );
@@ -137,63 +108,21 @@ export const authService = {
     }
   },
 
-  async loginRedirect(returnTo?: string): Promise<void> {
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
-    const state = generateState();
-
-    savePkceState({ codeVerifier, state, returnTo });
-
-    const params = new URLSearchParams({
-      client_id: OIDC_CONFIG.clientId,
-      redirect_uri: OIDC_CONFIG.redirectUri,
-      response_type: "code",
-      scope: OIDC_CONFIG.scopes,
-      state,
-      code_challenge: codeChallenge,
-      code_challenge_method: "S256",
-    });
-
-    window.location.assign(`${OIDC_CONFIG.authUrl}?${params.toString()}`);
-  },
-
-  async handleCallback(code: string, state: string): Promise<string> {
-    const pkce = loadPkceState();
-    clearPkceState();
-
-    if (!pkce || pkce.state !== state) {
-      clearSession();
-      throw new Error("Estado de autenticacao invalido. Tente novamente.");
-    }
-
+  async login(username: string, password: string): Promise<void> {
     const tokens = await requestToken(
       new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: OIDC_CONFIG.clientId,
-        code,
-        redirect_uri: OIDC_CONFIG.redirectUri,
-        code_verifier: pkce.codeVerifier,
+        grant_type: "password",
+        client_id: CLIENT_ID,
+        username,
+        password,
       }),
     );
 
     saveSession(tokens);
-    return pkce.returnTo ?? "/dashboard";
   },
 
-  async logout(): Promise<void> {
-    const session = loadSession();
+  logout(): void {
     clearSession();
-
-    const params = new URLSearchParams({
-      client_id: OIDC_CONFIG.clientId,
-      post_logout_redirect_uri: OIDC_CONFIG.postLogoutRedirectUri,
-    });
-
-    if (session?.idToken) {
-      params.set("id_token_hint", session.idToken);
-    }
-
-    window.location.assign(`${OIDC_CONFIG.logoutUrl}?${params.toString()}`);
   },
 
   async getAccessToken(): Promise<string | null> {
