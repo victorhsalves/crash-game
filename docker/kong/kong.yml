@@ -4,7 +4,7 @@ plugins:
   - name: cors
     config:
       origins:
-        - http://147.93.66.151:5173
+        - http://localhost:5173
       methods:
         - GET
         - POST

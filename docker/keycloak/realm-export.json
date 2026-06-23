@@ -54,10 +54,10 @@
       "directAccessGrantsEnabled": true,
       "protocol": "openid-connect",
       "redirectUris": [
-        "http://147.93.66.151:5173/*"
+        "http://localhost:5173/*"
       ],
       "webOrigins": [
-        "http://147.93.66.151:5173"
+        "http://localhost:5173"
       ],
       "attributes": {
         "pkce.code.challenge.method": "S256"
