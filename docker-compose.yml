@@ -141,9 +141,12 @@ services:
         VITE_API_BASE_URL: http://${PUBLIC_HOST:-147.93.66.151}:8000
         VITE_OIDC_AUTHORITY: http://${PUBLIC_HOST:-147.93.66.151}:8080/realms/crash-game
         VITE_OIDC_CLIENT_ID: crash-game-client
-        VITE_WS_URL: http://${PUBLIC_HOST:-147.93.66.151}:4001
+        VITE_WS_URL: http://${PUBLIC_HOST:-147.93.66.151}:5173
     ports:
       - "5173:3000"
+    depends_on:
+      games:
+        condition: service_healthy
 
 volumes:
   postgres_data:

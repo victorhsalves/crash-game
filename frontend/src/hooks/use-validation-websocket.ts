@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { websocketService } from "@/services/websocket/websocket.service";
 import type { EventLogSource } from "@/types/event-log.types";
 
@@ -8,6 +9,7 @@ interface UseValidationWebSocketOptions {
 }
 
 export function useValidationWebSocket({ append, onEvent }: UseValidationWebSocketOptions): void {
+  const { isAuthenticated, isInitialized } = useAuth();
   const appendRef = useRef(append);
   const onEventRef = useRef(onEvent);
 
@@ -17,7 +19,11 @@ export function useValidationWebSocket({ append, onEvent }: UseValidationWebSock
   });
 
   useEffect(() => {
-    const url = import.meta.env.VITE_WS_URL;
+    if (!isInitialized || !isAuthenticated) {
+      return;
+    }
+
+    const url = import.meta.env.VITE_WS_URL || window.location.origin;
 
     websocketService.subscribe({
       onConnect: (payload) => {
@@ -40,5 +46,5 @@ export function useValidationWebSocket({ append, onEvent }: UseValidationWebSock
     return () => {
       websocketService.disconnect();
     };
-  }, []);
+  }, [isAuthenticated, isInitialized]);
 }

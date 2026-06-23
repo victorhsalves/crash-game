@@ -38,7 +38,9 @@ class WebSocketService {
     const generation = this.connectGeneration;
 
     this.connectPromise = this.establishConnection(url, generation).finally(() => {
-      this.connectPromise = null;
+      if (this.connectGeneration === generation) {
+        this.connectPromise = null;
+      }
     });
 
     return this.connectPromise;
@@ -57,7 +59,9 @@ class WebSocketService {
       auth: {
         token: token ?? "",
       },
+      forceNew: true,
       reconnection: false,
+      transports: ["websocket", "polling"],
     });
 
     if (generation !== this.connectGeneration) {
@@ -68,20 +72,45 @@ class WebSocketService {
 
     this.socket = socket;
     this.connectedUrl = url;
+    this.bindSocketHandlers(socket, generation);
+
+    if (socket.connected) {
+      this.handlers.onConnect?.({ socketId: socket.id });
+    }
+  }
+
+  private bindSocketHandlers(socket: Socket, generation: number): void {
+    const isActive = (): boolean => generation === this.connectGeneration;
 
     socket.on("connect", () => {
+      if (!isActive()) {
+        return;
+      }
+
       this.handlers.onConnect?.({ socketId: socket.id });
     });
 
     socket.on("disconnect", (reason) => {
+      if (!isActive()) {
+        return;
+      }
+
       this.handlers.onDisconnect?.({ socketId: socket.id, reason });
     });
 
     socket.on("connect_error", (error: Error) => {
+      if (generation !== this.connectGeneration) {
+        return;
+      }
+
       this.handlers.onConnectError?.({ message: error.message });
     });
 
     socket.onAny((event, ...args) => {
+      if (!isActive()) {
+        return;
+      }
+
       const payload = args.length === 1 ? args[0] : args;
       this.handlers.onEvent?.(event, payload);
     });
