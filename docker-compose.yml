@@ -47,7 +47,7 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_ENABLED: "true"
-      KC_HOSTNAME: localhost
+      KC_HOSTNAME: ${PUBLIC_HOST:-147.93.66.151}
       KC_HTTP_PORT: "8080"
       KC_HOSTNAME_STRICT: "false"
       KC_HOSTNAME_STRICT_HTTPS: "false"
@@ -94,7 +94,7 @@ services:
     ports:
       - "4001:4001"
     env_file:
-      - ./services/games/.env
+      - ./services/games/.env.example
     depends_on:
       postgres:
         condition: service_healthy
@@ -117,7 +117,7 @@ services:
     ports:
       - "4002:4002"
     env_file:
-      - ./services/wallets/.env
+      - ./services/wallets/.env.example
     depends_on:
       postgres:
         condition: service_healthy
@@ -138,14 +138,12 @@ services:
       context: .
       dockerfile: frontend/Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8000
-        VITE_OIDC_AUTHORITY: http://localhost:8080/realms/crash-game
+        VITE_API_BASE_URL: http://${PUBLIC_HOST:-147.93.66.151}:8000
+        VITE_OIDC_AUTHORITY: http://${PUBLIC_HOST:-147.93.66.151}:8080/realms/crash-game
         VITE_OIDC_CLIENT_ID: crash-game-client
-        VITE_WS_URL: http://localhost:4001
+        VITE_WS_URL: http://${PUBLIC_HOST:-147.93.66.151}:4001
     ports:
       - "5173:3000"
-    env_file:
-      - ./frontend/.env
 
 volumes:
   postgres_data:
