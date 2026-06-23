@@ -8,3 +8,4 @@ export { SocketJwtAuthService } from "./presentation/socket-jwt-auth.service";
 export { WsJwtGuard } from "./presentation/ws-jwt.guard";
 export { AuthController } from "./presentation/auth.controller";
 export { AuthModule } from "./auth.module";
+export type { AuthModuleOptions } from "./auth.module-options";
